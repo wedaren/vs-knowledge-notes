@@ -11,6 +11,11 @@
    ],
    "icon": "img/icon.png",
    "license": "MIT",
+   "publisher": "wedaren",
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/wedaren/vs-knowledge-notes.git"
+   },
    "activationEvents": [
       "*"
    ],
