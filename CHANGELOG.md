@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.1.3] - 2025-04-27
+
+ - Update version compatibility
+ - Performance improvements
+ - Bug fixes for file operations
+ - Add configuration option to show hidden files in note explorer
+
 ## [1.1.2]
 
  - Update docs
