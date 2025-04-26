@@ -1,12 +1,12 @@
-# VS Knowledge Notes
-VSCode extension for managing your knowledge.
+# Daily Order
+VSCode extension for managing your daily order.
 
 ![Sample](./img/sample.png)
 
 ### Tested at **Windows** only.
 
 # Feature
-- Quick access to your knowledge via activity bar.
+- Quick access to your daily order via activity bar.
 - Use read-only mode for safely viewing.
 - Open markdown as preview by one action when read-only mode.
 - Add tags to your note and show tag tree view.
@@ -15,14 +15,14 @@ VSCode extension for managing your knowledge.
 - Manage revision your note by git.
 
 # Get Started
-Execute `VS Knowledge Notes: Set Notes Directory` or click `Set Notes Directory` button on side menu for set note saving directory.
+Execute `Daily Order: Set Notes Directory` or click `Set Notes Directory` button on side menu for set note saving directory.
 
 # File Operations
 ![Demo](./img/file_operations.gif)
 You can operate file in notes directory by GUI, commands and keyboard shortcuts.
 ## Commands
- - `VS Knowledge Notes: New File`
- - `VS Knowledge Notes: New Folder`
+ - `Daily Order: New File`
+ - `Daily Order: New Folder`
 ## Keyboard Shortcuts
 | Operation        | Shortcut       |
 | ---------------- | -------------- |
@@ -39,7 +39,7 @@ Deleted files will be moved to the Trash.
 
 # Display Mode
 ![Demo](./img/display_mode.gif)
-VS Knowledge Notes has two display mode. You can toggle display mode via statusbar or `VS Knowledge Notes: Toggle Display Mode` command.
+Daily Order has two display mode. You can toggle display mode via statusbar or `Daily Order: Toggle Display Mode` command.
 ## Edit Mode
 Edit mode is the same mode as normal vscode, so you can edit file
 as you like.
@@ -64,14 +64,14 @@ Tags can be hierarchized by delimiting them with a `/`. The delimiter can be cha
 
 # Search
 ![Demo](./img/search_demo.gif)
-You can search in notes via `VS Knowledge Notes: Search In Notes` command.
+You can search in notes via `Daily Order: Search In Notes` command.
 Use the button in the upper right for toggling match case, match whole word and use regex.
 ![SearchCommand](./img/search_command.png)
 
 # Settings
 | Name                               | Description                                                                     | type                                |
 | ---------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------- |
-| `vs-knowledge-notes.notesDir`      | Directory where notes are saved.                                                | string                              |
-| `vs-knowledge-notes.confirmDelete` | Controls whether the explorer should ask for confirmation when deleting a file. | boolean                             |
-| `vs-knowledge-notes.previewEngine` | Directory where notes are saved.                                                | 'default' \| 'enhanced' \| 'disuse' |
-| `vs-knowledge-notes.tagDelimiter`  | A character to delimit tag.                                                     | string                              |
+| `daily-order.notesDir`      | Directory where notes are saved.                                                | string                              |
+| `daily-order.confirmDelete` | Controls whether the explorer should ask for confirmation when deleting a file. | boolean                             |
+| `daily-order.previewEngine` | Directory where notes are saved.                                                | 'default' \| 'enhanced' \| 'disuse' |
+| `daily-order.tagDelimiter`  | A character to delimit tag.                                                     | string                              |

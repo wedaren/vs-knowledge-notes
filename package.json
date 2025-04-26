@@ -1,8 +1,7 @@
 {
-   "name": "vs-knowledge-notes",
-   "displayName": "VS Knowledge Notes",
-   "description": "VSCode extension for managing your knowledge.",
-   "publisher": "k-kuroguro",
+   "name": "daily-order",
+   "displayName": "Daily Order",
+   "description": "VSCode extension for managing your daily order.",
    "version": "1.1.1",
    "engines": {
       "vscode": "^1.57.0"
@@ -12,14 +11,6 @@
    ],
    "icon": "img/icon.png",
    "license": "MIT",
-   "homepage": "https://github.com/k-kuroguro/vs-knowledge-notes/blob/master/README.md",
-   "repository": {
-      "type": "git",
-      "url": "https://github.com/k-kuroguro/vs-knowledge-notes.git"
-   },
-   "bugs": {
-      "url": "https://github.com/k-kuroguro/vs-knowledge-notes/issues"
-   },
    "activationEvents": [
       "*"
    ],
@@ -27,142 +18,142 @@
    "contributes": {
       "commands": [
          {
-            "command": "vs-knowledge-notes.setNotesDir",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.setNotesDir",
+            "category": "Daily Order",
             "title": "Set Notes Directory"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.refresh",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.refresh",
+            "category": "Daily Order",
             "title": "Refresh Note Explorer",
             "icon": "$(extensions-refresh)"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.newFile",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.newFile",
+            "category": "Daily Order",
             "title": "New File",
             "icon": "$(new-file)"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.newFolder",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.newFolder",
+            "category": "Daily Order",
             "title": "New Folder",
             "icon": "$(new-folder)"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.openInIntegratedTerminal",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.openInIntegratedTerminal",
+            "category": "Daily Order",
             "title": "Open In Integrated Terminal"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.findInFolder",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.findInFolder",
+            "category": "Daily Order",
             "title": "Find in Folder"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.cut",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.cut",
+            "category": "Daily Order",
             "title": "Cut"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.copy",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.copy",
+            "category": "Daily Order",
             "title": "Copy"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.paste",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.paste",
+            "category": "Daily Order",
             "title": "Paste"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.copyPath",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.copyPath",
+            "category": "Daily Order",
             "title": "Copy Path"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.copyRelativePath",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.copyRelativePath",
+            "category": "Daily Order",
             "title": "Copy Relative Path"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.rename",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.rename",
+            "category": "Daily Order",
             "title": "Rename"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.delete",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.noteExplorer.delete",
+            "category": "Daily Order",
             "title": "Delete"
          },
          {
-            "command": "vs-knowledge-notes.toggleDisplayMode",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.toggleDisplayMode",
+            "category": "Daily Order",
             "title": "Toggle Display Mode"
          },
          {
-            "command": "vs-knowledge-notes.tagExplorer.refresh",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.tagExplorer.refresh",
+            "category": "Daily Order",
             "title": "Refresh Tag Explorer",
             "icon": "$(extensions-refresh)"
          },
          {
-            "command": "vs-knowledge-notes.searchInNotes",
-            "category": "VS Knowledge Notes",
+            "command": "daily-order.searchInNotes",
+            "category": "Daily Order",
             "title": "Search In Notes"
          }
       ],
       "keybindings": [
          {
-            "command": "vs-knowledge-notes.noteExplorer.findInFolder",
+            "command": "daily-order.noteExplorer.findInFolder",
             "key": "shift+alt+f",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus && viewItem == vs-knowledge-notes.Directory"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus && viewItem == daily-order.Directory"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.cut",
+            "command": "daily-order.noteExplorer.cut",
             "key": "ctrl+x",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.copy",
+            "command": "daily-order.noteExplorer.copy",
             "key": "ctrl+c",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.paste",
+            "command": "daily-order.noteExplorer.paste",
             "key": "ctrl+v",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.copyPath",
+            "command": "daily-order.noteExplorer.copyPath",
             "key": "shift+alt+c",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.copyRelativePath",
+            "command": "daily-order.noteExplorer.copyRelativePath",
             "key": "ctrl+shift+c",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.rename",
+            "command": "daily-order.noteExplorer.rename",
             "key": "f2",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          },
          {
-            "command": "vs-knowledge-notes.noteExplorer.delete",
+            "command": "daily-order.noteExplorer.delete",
             "key": "delete",
-            "when": "focusedView == vs-knowledge-notes.noteExplorer && !inputFocus"
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          }
       ],
       "views": {
          "VSKnowledgeNotes": [
             {
-               "id": "vs-knowledge-notes.noteExplorer",
+               "id": "daily-order.noteExplorer",
                "name": "Note Explorer",
                "icon": "$(files)",
                "contextualTitle": "Note Explorer"
             },
             {
-               "id": "vs-knowledge-notes.tagExplorer",
+               "id": "daily-order.tagExplorer",
                "name": "Tag Explorer",
                "icon": "$(tag)",
                "contextualTitle": "Tag Explorer"
@@ -173,168 +164,168 @@
          "activitybar": [
             {
                "id": "VSKnowledgeNotes",
-               "title": "VS Knowledge Notes",
+               "title": "Daily Order",
                "icon": "$(notebook)"
             }
          ]
       },
       "viewsWelcome": [
          {
-            "view": "vs-knowledge-notes.noteExplorer",
-            "contents": "No notes directory found.\n[Set Notes Directory](command:vs-knowledge-notes.setNotesDir)",
-            "when": "!config.vs-knowledge-notes.notesDir"
+            "view": "daily-order.noteExplorer",
+            "contents": "No notes directory found.\n[Set Notes Directory](command:daily-order.setNotesDir)",
+            "when": "!config.daily-order.notesDir"
          },
          {
-            "view": "vs-knowledge-notes.noteExplorer",
+            "view": "daily-order.noteExplorer",
             "contents": "Loading notes directory.",
-            "when": "config.vs-knowledge-notes.notesDir && !vs-knowledge-notes.isEmptyNotesDir"
+            "when": "config.daily-order.notesDir && !daily-order.isEmptyNotesDir"
          },
          {
-            "view": "vs-knowledge-notes.noteExplorer",
+            "view": "daily-order.noteExplorer",
             "contents": "Notes directory is empty.",
-            "when": "config.vs-knowledge-notes.notesDir && vs-knowledge-notes.isEmptyNotesDir"
+            "when": "config.daily-order.notesDir && daily-order.isEmptyNotesDir"
          },
          {
-            "view": "vs-knowledge-notes.tagExplorer",
+            "view": "daily-order.tagExplorer",
             "contents": "Loading tags.",
-            "when": "config.vs-knowledge-notes.notesDir && !vs-knowledge-notes.isNothingTag"
+            "when": "config.daily-order.notesDir && !daily-order.isNothingTag"
          },
          {
-            "view": "vs-knowledge-notes.tagExplorer",
+            "view": "daily-order.tagExplorer",
             "contents": "Tag is nothing.",
-            "when": "!config.vs-knowledge-notes.notesDir || vs-knowledge-notes.isNothingTag"
+            "when": "!config.daily-order.notesDir || daily-order.isNothingTag"
          }
       ],
       "menus": {
          "view/title": [
             {
-               "command": "vs-knowledge-notes.noteExplorer.refresh",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.refresh",
+               "when": "view == daily-order.noteExplorer",
                "group": "navigation"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.newFolder",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.newFolder",
+               "when": "view == daily-order.noteExplorer",
                "group": "navigation"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.newFile",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.newFile",
+               "when": "view == daily-order.noteExplorer",
                "group": "navigation"
             },
             {
-               "command": "vs-knowledge-notes.tagExplorer.refresh",
-               "when": "view == vs-knowledge-notes.tagExplorer",
+               "command": "daily-order.tagExplorer.refresh",
+               "when": "view == daily-order.tagExplorer",
                "group": "navigation"
             }
          ],
          "view/item/context": [
             {
-               "command": "vs-knowledge-notes.noteExplorer.newFile",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.newFile",
+               "when": "view == daily-order.noteExplorer",
                "group": "1_creation@1"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.newFolder",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.newFolder",
+               "when": "view == daily-order.noteExplorer",
                "group": "1_creation@2"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.openInIntegratedTerminal",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.openInIntegratedTerminal",
+               "when": "view == daily-order.noteExplorer",
                "group": "1_creation@3"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.findInFolder",
-               "when": "view == vs-knowledge-notes.noteExplorer && viewItem == vs-knowledge-notes.Directory",
+               "command": "daily-order.noteExplorer.findInFolder",
+               "when": "view == daily-order.noteExplorer && viewItem == daily-order.Directory",
                "group": "2_finding@1"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.cut",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.cut",
+               "when": "view == daily-order.noteExplorer",
                "group": "3_editing@1"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.copy",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.copy",
+               "when": "view == daily-order.noteExplorer",
                "group": "3_editing@2"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.paste",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.paste",
+               "when": "view == daily-order.noteExplorer",
                "group": "3_editing@3"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.copyPath",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.copyPath",
+               "when": "view == daily-order.noteExplorer",
                "group": "4_path@1"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.copyRelativePath",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.copyRelativePath",
+               "when": "view == daily-order.noteExplorer",
                "group": "4_path@2"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.rename",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.rename",
+               "when": "view == daily-order.noteExplorer",
                "group": "5_modification@1"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.delete",
-               "when": "view == vs-knowledge-notes.noteExplorer",
+               "command": "daily-order.noteExplorer.delete",
+               "when": "view == daily-order.noteExplorer",
                "group": "5_modification@2"
             }
          ],
          "commandPalette": [
             {
-               "command": "vs-knowledge-notes.noteExplorer.findInFolder",
+               "command": "daily-order.noteExplorer.findInFolder",
                "when": "false"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.cut",
+               "command": "daily-order.noteExplorer.cut",
                "when": "false"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.copy",
+               "command": "daily-order.noteExplorer.copy",
                "when": "false"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.paste",
+               "command": "daily-order.noteExplorer.paste",
                "when": "false"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.copyPath",
+               "command": "daily-order.noteExplorer.copyPath",
                "when": "false"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.copyRelativePath",
+               "command": "daily-order.noteExplorer.copyRelativePath",
                "when": "false"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.rename",
+               "command": "daily-order.noteExplorer.rename",
                "when": "false"
             },
             {
-               "command": "vs-knowledge-notes.noteExplorer.delete",
+               "command": "daily-order.noteExplorer.delete",
                "when": "false"
             }
          ]
       },
       "configuration": {
          "type": "object",
-         "title": "VS Knowledge Notes Configuration",
+         "title": "Daily Order Configuration",
          "properties": {
-            "vs-knowledge-notes.notesDir": {
+            "daily-order.notesDir": {
                "type": "string",
                "default": null,
                "description": "Directory where notes are saved."
             },
-            "vs-knowledge-notes.confirmDelete": {
+            "daily-order.confirmDelete": {
                "type": "boolean",
                "default": true,
                "description": "Controls whether the explorer should ask for confirmation when deleting a file."
             },
-            "vs-knowledge-notes.previewEngine": {
+            "daily-order.previewEngine": {
                "type": "string",
                "default": "default",
                "enum": [
@@ -349,7 +340,7 @@
                   "Not display preview. Show file as readonly instead of preview."
                ]
             },
-            "vs-knowledge-notes.tagDelimiter": {
+            "daily-order.tagDelimiter": {
                "type": "string",
                "default": "/",
                "description": "A character to delimit tag."
