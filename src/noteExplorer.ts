@@ -25,6 +25,18 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
    getTreeItem(element: File): vscode.TreeItem {
       return element;
    }
+   
+   /**
+    * Checks if file or directory should be hidden
+    */
+   private shouldHide(name: string): boolean {
+      // If showHiddenFiles is true, don't hide any files based on name
+      if (this.config.showHiddenFiles) {
+         return false;
+      }
+      // Hide files/directories starting with .
+      return name.startsWith('.');
+   }
 
    async getChildren(element?: File): Promise<File[]> {
       if (!this.config.notesDir) return [];
@@ -42,7 +54,15 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
             }
             return a[1] === vscode.FileType.Directory ? -1 : 1;
          });
-         return children.map(([name, type]) => new File(vscode.Uri.file(name), type));
+         
+         // Filter out invisible files/directories and binary files
+         const filteredChildren = children.filter(([name]) => {
+            const basename = path.basename(name);
+            if (this.shouldHide(basename)) return false;
+            return true;
+         });
+         
+         return filteredChildren.map(([name, type]) => new File(vscode.Uri.file(name), type));
       }
 
       const children = await this.fileSystemProvider.readDirectory(this.config.notesDir);
@@ -55,7 +75,14 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
 
       this.config.isEmptyNotesDir = !children.length;
 
-      return children.map(([name, type]) => new File(vscode.Uri.file(name), type));
+      // Filter out invisible files/directories and binary files
+      const filteredChildren = children.filter(([name]) => {
+         const basename = path.basename(name);
+         if (this.shouldHide(basename)) return false;
+         return true;
+      });
+
+      return filteredChildren.map(([name, type]) => new File(vscode.Uri.file(name), type));
    }
 
 }
@@ -75,7 +102,7 @@ export class NoteExplorer {
       this.disposables.push(
          this.treeView,
          this.config.onDidChangeConfig(e => {
-            if (e && e.indexOf(Config.ConfigItem.NotesDir) !== -1) {
+            if (e && (e.indexOf(Config.ConfigItem.NotesDir) !== -1 || e.indexOf(Config.ConfigItem.ShowHiddenFiles) !== -1)) {
                this.treeDataProvider.refresh();
             }
             if (e && e.indexOf(Config.ConfigItem.DisplayMode) !== -1) {

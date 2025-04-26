@@ -22,7 +22,7 @@ export class Config {
       this.hasSetListener = true;
       return vscode.workspace.onDidChangeConfiguration(() => {
          this.loadWorkspaceConfig();
-         this._onDidChangeConfig.fire([Config.ConfigItem.NotesDir, Config.ConfigItem.ConfirmDelete, Config.ConfigItem.PreviewEngine, Config.ConfigItem.SinglePreview]);
+         this._onDidChangeConfig.fire([Config.ConfigItem.NotesDir, Config.ConfigItem.ConfirmDelete, Config.ConfigItem.PreviewEngine, Config.ConfigItem.SinglePreview, Config.ConfigItem.ShowHiddenFiles]);
       });
    }
 
@@ -78,6 +78,15 @@ export class Config {
       this._onDidChangeConfig.fire([Config.ConfigItem.SinglePreview]);
    }
 
+   get showHiddenFiles(): boolean {
+      return this.workspaceConfig.get('showHiddenFiles') ?? false;
+   }
+
+   set showHiddenFiles(show: boolean) {
+      this.workspaceConfig.update('showHiddenFiles', show, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.ShowHiddenFiles]);
+   }
+
    //#endregion
 
    private _displayMode: DisplayMode = DisplayMode.Edit;
@@ -125,7 +134,8 @@ export namespace Config {
       TagDelimiter: 'tagDelimiter',
       DisplayMode: 'displayMode',
       IsNothingTag: 'isNothingTag',
-      IsEmptyNotesDir: 'isEmptyNotesDir'
+      IsEmptyNotesDir: 'isEmptyNotesDir',
+      ShowHiddenFiles: 'showHiddenFiles'
    } as const;
    export const PreviewEngine = {
       Default: 'default',

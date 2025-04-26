@@ -349,6 +349,11 @@
                "type": "string",
                "default": "/",
                "description": "A character to delimit tag."
+            },
+            "daily-order.showHiddenFiles": {
+               "type": "boolean",
+               "default": false,
+               "description": "Controls whether hidden files (starting with a dot) are shown in the note explorer."
             }
          }
       }
