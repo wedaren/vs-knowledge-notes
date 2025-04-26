@@ -377,8 +377,8 @@
       "eslint": "^7.19.0",
       "glob": "^7.1.6",
       "mocha": "^10.8.2",
-      "ts-loader": "^8.0.14",
-      "typescript": "^4.1.3",
+      "ts-loader": "^9.4.4",
+      "typescript": "^4.9.5",
       "vscode-test": "^1.5.0",
       "webpack": "^5.96.1",
       "webpack-cli": "^4.4.0"

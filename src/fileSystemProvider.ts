@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import trash from 'trash';
 import { extensionDisplayName, extensionName } from './constants';
 
 class Utils {
@@ -124,8 +125,27 @@ export class FileSystemProvider implements vscode.FileSystemProvider {
    }
 
    delete(uri: vscode.Uri, options: { recursive: boolean }): Promise<void> {
-      return new Promise<void>((resolve, reject) => {
-         fs.rmdir(uri.fsPath, { recursive: options.recursive }, error => Utils.handleResult(resolve, reject, error, undefined));
+      return new Promise<void>(async (resolve, reject) => {
+         try {
+            // Use trash package to move to recycle bin/trash instead of permanent deletion
+            await trash(uri.fsPath, { glob: false });
+            resolve();
+         } catch (error) {
+            // Fall back to regular deletion if trash fails
+            fs.stat(uri.fsPath, (statError, stats) => {
+               if (statError) {
+                  return Utils.handleResult(resolve, reject, statError, undefined);
+               }
+               
+               if (stats.isDirectory()) {
+                  fs.rmdir(uri.fsPath, { recursive: options.recursive }, error => 
+                     Utils.handleResult(resolve, reject, error, undefined));
+               } else {
+                  fs.unlink(uri.fsPath, error => 
+                     Utils.handleResult(resolve, reject, error, undefined));
+               }
+            });
+         }
       });
    }
 
