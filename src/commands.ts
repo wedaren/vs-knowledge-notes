@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { Config } from './config';
 import { extensionName } from './constants';
 import { FileSystemProvider } from './fileSystemProvider';
+import dayjs = require('dayjs');
 
 const config = Config.getInstance();
 
@@ -54,7 +55,7 @@ async function focusOnTodayOrderNote(fileSystemProvider: FileSystemProvider) {
    }
 
 
-   const noteFileName = new Date().toISOString().split('T')[0] + '.md';
+   const noteFileName = dayjs().format('YYYY-MM-DD') + '.md';
    const noteFileUri = vscode.Uri.file(`${config.notesDir?.path}/${FolderName}/${noteFileName}`);
    if (!fileSystemProvider.exists(noteFileUri)) {
       await fileSystemProvider.writeFile(noteFileUri, new Uint8Array(), { create: true, overwrite: false });
