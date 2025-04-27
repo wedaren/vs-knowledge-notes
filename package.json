@@ -28,6 +28,11 @@
             "title": "Set Notes Directory"
          },
          {
+            "command": "daily-order.focusOnTodayOrderNote",
+            "category": "Daily Order",
+            "title": "Focus On Today Order Note"
+         },
+         {
             "command": "daily-order.noteExplorer.refresh",
             "category": "Daily Order",
             "title": "Refresh Note Explorer",

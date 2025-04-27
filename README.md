@@ -7,7 +7,6 @@ VSCode extension for managing your daily order.
 
 # Feature
 - Quick access to your daily order via activity bar.
-- Use read-only mode for safely viewing.
 - Open markdown as preview by one action when read-only mode.
 - Add tags to your note and show tag tree view.
 - Search in your notes via command pallette.
@@ -44,7 +43,7 @@ Daily Order has two display mode. You can toggle display mode via statusbar or `
 Edit mode is the same mode as normal vscode, so you can edit file
 as you like.
 ## View Mode
-View mode is for reading only. File is added read-only attribute and markdown file is opened as preview.
+File is added read-only attribute and markdown file is opened as preview.
 
 To preview markdown, you can use vscode standard or [Markdown Preview Enhanced](https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced). See [Settings](#Settings).
 
