@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
       new StatusBar(),
       new TagExplorer(fileSystemProvider),
       new Search(),
-      ...registerCommands()
+      ...registerCommands(fileSystemProvider)
    );
 }
 
