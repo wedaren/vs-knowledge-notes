@@ -24,7 +24,15 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
    getTreeItem(element: File): vscode.TreeItem {
       return element;
    }
-   
+   async getParent(element: File): Promise<File | undefined> {
+      if (!this.config.notesDir) return undefined;
+      const parentUri = vscode.Uri.file(path.dirname(element.uri.fsPath));
+      if (parentUri.fsPath === this.config.notesDir.fsPath) return undefined;
+      const parentStat = await this.fileSystemProvider.stat(parentUri);
+      if (!parentStat) return undefined;
+      return new File(parentUri, parentStat.type);
+   }
+
    /**
     * Checks if file or directory should be hidden
     */
@@ -53,14 +61,14 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
             }
             return a[1] === vscode.FileType.Directory ? -1 : 1;
          });
-         
+
          // Filter out invisible files/directories and binary files
          const filteredChildren = children.filter(([name]) => {
             const basename = path.basename(name);
             if (this.shouldHide(basename)) return false;
             return true;
          });
-         
+
          return filteredChildren.map(([name, type]) => new File(vscode.Uri.file(name), type));
       }
 
@@ -132,7 +140,8 @@ export class NoteExplorer {
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.copyPath`, (file?: File) => this.copyPath(file)),
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.copyRelativePath`, (file?: File) => this.copyRelativePath(file)),
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.rename`, (file?: File) => this.rename(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.delete`, (file?: File) => this.delete(file))
+         vscode.commands.registerCommand(`${extensionName}.noteExplorer.delete`, (file?: File) => this.delete(file)),
+         vscode.commands.registerCommand(`${extensionName}.noteExplorer.reveal`, (uri: vscode.Uri) => this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true })),
       ];
    }
 

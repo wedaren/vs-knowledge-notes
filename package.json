@@ -152,10 +152,13 @@
             "command": "daily-order.noteExplorer.delete",
             "key": "delete",
             "when": "focusedView == daily-order.noteExplorer && !inputFocus"
+         },
+         {
+            "command": "daily-order.noteExplorer.reveal"
          }
       ],
       "views": {
-         "VSKnowledgeNotes": [
+         "DailyOrder": [
             {
                "id": "daily-order.noteExplorer",
                "name": "Note Explorer",
@@ -173,9 +176,9 @@
       "viewsContainers": {
          "activitybar": [
             {
-               "id": "VSKnowledgeNotes",
+               "id": "DailyOrder",
                "title": "Daily Order",
-               "icon": "$(notebook)"
+               "icon": "$(output-view-icon)"
             }
          ]
       },

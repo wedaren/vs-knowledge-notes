@@ -29,7 +29,7 @@ async function focusOnFile(fileUri: vscode.Uri, options?: { viewColumn?: vscode.
    try {
       await vscode.workspace.fs.stat(fileUri);
       const document = await vscode.workspace.openTextDocument(fileUri);
-
+      await vscode.commands.executeCommand('daily-order.noteExplorer.reveal', fileUri);
       await vscode.window.showTextDocument(document, {
          viewColumn: options?.viewColumn,
          preview: false,
