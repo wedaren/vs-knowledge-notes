@@ -10,6 +10,7 @@ VSCode extension for managing your daily order.
 - Open markdown as preview by one action when read-only mode.
 - Add tags to your note and show tag tree view.
 - Search in your notes via command pallette.
+- Focus On Today Order Note.
 ### TBA
 - Manage revision your note by git.
 
