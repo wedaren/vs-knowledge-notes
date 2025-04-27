@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.1.5] - 2025-04-27
+
+- Enhance 'Focus On Today Order Note' command to reveal the note in the treeview
+
+## [1.1.4] - 2025-04-25
+
+ - Add 'Focus On Today Order Note' command
+
 ## [1.1.3] - 2025-04-27
 
  - Update version compatibility
