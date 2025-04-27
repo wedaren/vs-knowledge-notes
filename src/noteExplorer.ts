@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { FileSystemProvider, File } from './fileSystemProvider';
-import { FileAccess } from './fileAccess';
 import { Config } from './config';
 import { extensionName } from './constants';
 import { DisplayMode } from './types';
@@ -78,20 +77,6 @@ export class NoteExplorer {
             if (e && e.indexOf(Config.ConfigItem.NotesDir) !== -1) {
                this.treeDataProvider.refresh();
             }
-            if (e && e.indexOf(Config.ConfigItem.DisplayMode) !== -1) {
-               //if activeEditor is file in notesDir, change file access
-               if (this.config.notesDir && vscode.window.activeTextEditor && isChild(this.config.notesDir.fsPath, vscode.window.activeTextEditor.document.fileName)) {
-                  if (this.config.displayMode === DisplayMode.Edit) FileAccess.makeWritable(vscode.window.activeTextEditor.document.uri);
-                  else FileAccess.makeReadonly(vscode.window.activeTextEditor.document.uri);
-               }
-            }
-         }),
-         vscode.workspace.onDidChangeTextDocument(e => {
-            //if changed document is file in notesDir, change file access
-            if (this.config.notesDir && isChild(this.config.notesDir.fsPath, e.document.fileName)) {
-               if (this.config.displayMode === DisplayMode.Edit) FileAccess.makeWritable(e.document.uri);
-               else FileAccess.makeReadonly(e.document.uri);
-            }
          }),
          this.fileSystemProvider.onDidChangeFile(() => {
             this.treeDataProvider.refresh();
@@ -150,8 +135,6 @@ export class NoteExplorer {
       if (!uri) return;
 
       const isEditMode = this.config.displayMode === DisplayMode.Edit;
-      if (isEditMode) FileAccess.makeWritable(uri);
-      else FileAccess.makeReadonly(uri);
 
       if (isEditMode || this.config.previewEngine === Config.PreviewEngine.Disuse || path.extname(uri.fsPath) !== '.md') {
          await vscode.commands.executeCommand('vscode.open', uri);
