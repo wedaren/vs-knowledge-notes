@@ -1,5 +1,21 @@
 # Change Log
 
+## [1.1.8] - 2025-04-28
+
+- 版本更新
+- 性能优化
+- 修复bug
+
+## [1.1.7] - 2025-04-28
+
+- 版本更新
+- 修复小错误
+
+## [1.1.6] - 2025-04-28
+
+- 版本更新
+- 修复小错误
+
 ## [1.1.5] - 2025-04-27
 
 - Enhance 'Focus On Today Order Note' command to reveal the note in the treeview

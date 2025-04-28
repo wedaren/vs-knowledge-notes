@@ -67,6 +67,13 @@ class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
    }
 
    getTreeItem(element: TreeItem): vscode.TreeItem {
+      if (element instanceof File) {
+         element.command = {
+            command: 'daily-order.noteExplorer.reveal',
+            arguments: [element.uri],
+            title: '打开文件'
+         };
+      }
       return element;
    }
 
