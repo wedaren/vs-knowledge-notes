@@ -5,7 +5,7 @@ import * as path from 'path';
 import { RipGrepError, Match, Options } from './types';
 export * from './types';
 
-const rgPath = path.join(__dirname, '..', 'node_modules', 'vscode-ripgrep', 'bin', 'rg');
+const rgPath = path.join(__dirname, '..', 'node_modules', '@vscode/ripgrep', 'bin', 'rg');
 
 function formatResults(stdout: string): Match[] {
    stdout = stdout.trim();

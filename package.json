@@ -402,11 +402,11 @@
       "webpack-cli": "^4.4.0"
    },
    "dependencies": {
+      "@vscode/ripgrep": "^1.15.11",
       "dayjs": "^1.11.13",
       "escape-string-regexp": "^5.0.0",
       "fs-extra": "^9.1.0",
       "gray-matter": "^4.0.3",
-      "trash": "^8.1.1",
-      "vscode-ripgrep": "^1.11.3"
+      "trash": "^8.1.1"
    }
 }
