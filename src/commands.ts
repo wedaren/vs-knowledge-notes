@@ -43,20 +43,20 @@ async function focusOnFile(fileUri: vscode.Uri, options?: { viewColumn?: vscode.
 }
 
 async function focusOnTodayOrderNote(fileSystemProvider: FileSystemProvider) {
-   const config = Config.getInstance();
-   if (config.isEmptyNotesDir) {
-      vscode.window.showErrorMessage("Notes directory is not set.");
+   const notesDir = Config.getInstance().notesDir;
+   if (!notesDir) {
+      vscode.window.showErrorMessage('Notes directory is not set.');
       return;
    }
    const FolderName = 'TodayOrder';
-   const filename = vscode.Uri.file(`${config.notesDir?.path}/${FolderName}`);
+   const filename = vscode.Uri.file(`${notesDir?.path}/${FolderName}`);
    if (!fileSystemProvider.exists(filename)) {
       await fileSystemProvider.createDirectory(filename);
    }
 
 
    const noteFileName = dayjs().format('YYYY-MM-DD') + '.md';
-   const noteFileUri = vscode.Uri.file(`${config.notesDir?.path}/${FolderName}/${noteFileName}`);
+   const noteFileUri = vscode.Uri.file(`${notesDir?.path}/${FolderName}/${noteFileName}`);
    if (!fileSystemProvider.exists(noteFileUri)) {
       await fileSystemProvider.writeFile(noteFileUri, new Uint8Array(), { create: true, overwrite: false });
    }
