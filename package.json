@@ -51,6 +51,12 @@
             "icon": "$(new-folder)"
          },
          {
+            "command": "daily-order.noteExplorer.openInNewWindow",
+            "category": "Daily Order",
+            "title": "Open In New Window",
+            "icon": "$(window)"
+         },
+         {
             "command": "daily-order.noteExplorer.openInIntegratedTerminal",
             "category": "Daily Order",
             "title": "Open In Integrated Terminal"
@@ -155,6 +161,12 @@
          },
          {
             "command": "daily-order.noteExplorer.reveal"
+         },
+         {
+            "command": "daily-order.noteExplorer.openInNewWindow",
+            "key": "cmd+shift+n",
+            "mac": "cmd+shift+n",
+            "when": "focusedView == daily-order.noteExplorer && !inputFocus && viewItem == daily-order.Directory"
          }
       ],
       "views": {
@@ -227,6 +239,11 @@
                "group": "navigation"
             },
             {
+               "command": "daily-order.noteExplorer.openInNewWindow",
+               "when": "view == daily-order.noteExplorer && config.daily-order.notesDir",
+               "group": "navigation"
+            },
+            {
                "command": "daily-order.tagExplorer.refresh",
                "when": "view == daily-order.tagExplorer",
                "group": "navigation"
@@ -247,6 +264,11 @@
                "command": "daily-order.noteExplorer.openInIntegratedTerminal",
                "when": "view == daily-order.noteExplorer",
                "group": "1_creation@3"
+            },
+            {
+               "command": "daily-order.noteExplorer.openInNewWindow",
+               "when": "view == daily-order.noteExplorer",
+               "group": "1_creation@4"
             },
             {
                "command": "daily-order.noteExplorer.findInFolder",

@@ -133,6 +133,7 @@ export class NoteExplorer {
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.newFile`, (file?: File) => this.createNewFile(file)),
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.newFolder`, (file?: File) => this.createNewFolder(file)),
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.openInIntegratedTerminal`, (file?: File) => this.openInIntegratedTerminal(file)),
+         vscode.commands.registerCommand(`${extensionName}.noteExplorer.openInNewWindow`, (file?: File) => this.openInNewWindow(file)),
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.findInFolder`, (file?: File) => this.findInFolder(file)),
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.cut`, (file?: File) => this.cut(file)),
          vscode.commands.registerCommand(`${extensionName}.noteExplorer.copy`, (file?: File) => this.copy(file)),
@@ -230,6 +231,12 @@ export class NoteExplorer {
 
       const terminal = vscode.window.createTerminal({ cwd: dirname });
       terminal.show();
+   }
+
+   private openInNewWindow(file?: File): void {
+      if (!this.config.notesDir) return;
+      vscode.commands.executeCommand('vscode.openFolder', this.config.notesDir, { forceNewWindow: true });
+      // vscode.openFolder 没有参数打开新窗口并 reveal 指定的文件
    }
 
    private findInFolder(file?: File): void {
