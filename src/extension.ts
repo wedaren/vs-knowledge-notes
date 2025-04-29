@@ -7,11 +7,13 @@ import { FileSystemProvider } from './fileSystemProvider';
 import { TagExplorer } from './tagExplorer';
 import { Watcher } from './watcher';
 import { Search } from './search';
+import { GitAutoSaveManager } from './gitAutoSaveManager';
 
 export function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
    const watcher = Watcher.getInstance();
    watcher.watch(fileSystemProvider);
+   const gitAutoSaveManager = GitAutoSaveManager.getInstance();
 
    context.subscriptions.push(
       watcher,
@@ -20,6 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
       new StatusBar(),
       new TagExplorer(fileSystemProvider),
       new Search(),
+      gitAutoSaveManager,
       ...registerCommands(fileSystemProvider)
    );
 }

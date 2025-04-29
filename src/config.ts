@@ -22,7 +22,7 @@ export class Config {
       this.hasSetListener = true;
       return vscode.workspace.onDidChangeConfiguration(() => {
          this.loadWorkspaceConfig();
-         this._onDidChangeConfig.fire([Config.ConfigItem.NotesDir, Config.ConfigItem.ConfirmDelete, Config.ConfigItem.PreviewEngine, Config.ConfigItem.SinglePreview, Config.ConfigItem.ShowHiddenFiles]);
+         this._onDidChangeConfig.fire([Config.ConfigItem.NotesDir, Config.ConfigItem.ConfirmDelete, Config.ConfigItem.PreviewEngine, Config.ConfigItem.SinglePreview, Config.ConfigItem.ShowHiddenFiles, Config.ConfigItem.GitAutoSave, Config.ConfigItem.GitAutoSaveInterval]);
       });
    }
 
@@ -86,6 +86,24 @@ export class Config {
       this.workspaceConfig.update('showHiddenFiles', show, vscode.ConfigurationTarget.Global);
       this._onDidChangeConfig.fire([Config.ConfigItem.ShowHiddenFiles]);
    }
+   
+   get gitAutoSave(): boolean {
+      return this.workspaceConfig.get('gitAutoSave') ?? false;
+   }
+
+   set gitAutoSave(enable: boolean) {
+      this.workspaceConfig.update('gitAutoSave', enable, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.GitAutoSave]);
+   }
+
+   get gitAutoSaveInterval(): number {
+      return this.workspaceConfig.get('gitAutoSaveInterval') ?? 30;
+   }
+
+   set gitAutoSaveInterval(minutes: number) {
+      this.workspaceConfig.update('gitAutoSaveInterval', minutes, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.GitAutoSaveInterval]);
+   }
 
    //#endregion
 
@@ -135,7 +153,9 @@ export namespace Config {
       DisplayMode: 'displayMode',
       IsNothingTag: 'isNothingTag',
       IsEmptyNotesDir: 'isEmptyNotesDir',
-      ShowHiddenFiles: 'showHiddenFiles'
+      ShowHiddenFiles: 'showHiddenFiles',
+      GitAutoSave: 'gitAutoSave',
+      GitAutoSaveInterval: 'gitAutoSaveInterval'
    } as const;
    export const PreviewEngine = {
       Default: 'default',

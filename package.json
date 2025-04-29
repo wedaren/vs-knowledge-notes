@@ -116,6 +116,22 @@
             "command": "daily-order.searchInNotes",
             "category": "Daily Order",
             "title": "Search In Notes"
+         },
+         {
+            "command": "daily-order.toggleGitAutoSave",
+            "category": "Daily Order",
+            "title": "Toggle Git Auto Save"
+         },
+         {
+            "command": "daily-order.saveToGitNow",
+            "category": "Daily Order",
+            "title": "Save To Git Now",
+            "icon": "$(cloud-upload)"
+         },
+         {
+            "command": "daily-order.setGitAutoSaveInterval",
+            "category": "Daily Order",
+            "title": "Set Git Auto Save Interval"
          }
       ],
       "keybindings": [
@@ -167,6 +183,12 @@
             "key": "cmd+shift+n",
             "mac": "cmd+shift+n",
             "when": "focusedView == daily-order.noteExplorer && !inputFocus && viewItem == daily-order.Directory"
+         },
+         {
+            "command": "daily-order.saveToGitNow",
+            "key": "ctrl+alt+s",
+            "mac": "cmd+alt+s",
+            "when": "config.daily-order.notesDir && editorFocus"
          }
       ],
       "views": {
@@ -240,6 +262,11 @@
             },
             {
                "command": "daily-order.noteExplorer.openInNewWindow",
+               "when": "view == daily-order.noteExplorer && config.daily-order.notesDir",
+               "group": "navigation"
+            },
+            {
+               "command": "daily-order.saveToGitNow",
                "when": "view == daily-order.noteExplorer && config.daily-order.notesDir",
                "group": "navigation"
             },
@@ -384,6 +411,16 @@
                "type": "boolean",
                "default": false,
                "description": "Controls whether hidden files (starting with a dot) are shown in the note explorer."
+            },
+            "daily-order.gitAutoSave": {
+               "type": "boolean",
+               "default": false,
+               "description": "自动将笔记变更提交到 Git 仓库并推送。"
+            },
+            "daily-order.gitAutoSaveInterval": {
+               "type": "number",
+               "default": 30,
+               "description": "Git 自动保存的间隔时间（分钟）。"
             }
          }
       }
