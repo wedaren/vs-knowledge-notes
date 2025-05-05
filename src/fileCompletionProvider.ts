@@ -62,15 +62,10 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
           //使用find命令过滤文件
           console.log(`开始使用find命令搜索关键字: "${keyword}"`);
           const files = await this.filterFilesWithFind(notesDir.fsPath, keyword);
-          console.log(`找到 ${files.length} 个匹配文件`);
-
-          if (files.length === 0) {
-             console.log('没有找到匹配的文件，返回空数组');
-             return [];
-          }
-
+          files.unshift(path.join(notesDir.fsPath, `${keyword}.md`));
           //创建补全项
-          const completionItems = files.map(file => {
+          const completionItems = files.map((file,index) => {
+
              const relativePath = path.relative(notesDir.fsPath, file);
              const fileName = path.basename(file, '.md');
 
@@ -86,7 +81,7 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
              completionItem.documentation = new vscode.MarkdownString(`完整路径: ${file}`);
 
              //设置过滤文本，使其支持在任意位置匹配
-             completionItem.filterText = `>>${fileName}`;
+             completionItem.filterText = `>>${relativePath}`;
 
              //设置插入文本为Markdown链接格式
              const markdownLink = `[${fileName}](${relativePath})`;
@@ -101,9 +96,20 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
              console.log(`替换范围: ${startPosition.line}:${startPosition.character} -> ${endPosition.line}:${endPosition.character}`);
              console.log(`插入文本: ${markdownLink}`);
 
+             if(index === 0) {
+                const filePath = path.resolve(notesDir.fsPath, `${keyword}.md`);
+                completionItem.detail = '创建文件';
+
+                completionItem.command = {
+                   title: '创建文件',
+                   command: 'vs-knowledge-notes.checkAndCreateFile',
+                   arguments: [filePath]
+                };
+
+
+             }
              return completionItem;
           });
-
           console.log(`创建了 ${completionItems.length} 个补全项`);
           return completionItems;
        } catch (error) {
@@ -141,7 +147,7 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
           console.log(`开始使用find命令搜索: ${dir}, 关键字: ${keyword}`);
 
           //构建find命令，搜索.md文件，不区分大小写
-          const findCommand = `find "${dir}" -iname "*${keyword}*.md"`;
+          const findCommand = `find "${dir}" -iname "*.md"`;
           console.log(`执行命令: ${findCommand}`);
 
           const { stdout, stderr } = await execAsync(findCommand);
@@ -152,8 +158,6 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
 
           //处理输出结果
           const files = stdout.split('\n').filter(line => line.trim() !== '');
-          console.log(`find命令找到 ${files.length} 个匹配文件`);
-          console.log('文件列表:', files);
 
           return files;
        } catch (error) {
