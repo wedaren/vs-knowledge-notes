@@ -1,0 +1,121 @@
+name: Release VS Code Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionType:
+        description: 'Type of version update'
+        required: true
+        default: 'patch'
+        type: 'choice'
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Get previous tag
+        id: previoustag
+        run: echo "tag=$(git describe --tags --abbrev=0 || echo v0.0.0)" >> $GITHUB_OUTPUT
+      
+      - name: Update version in package.json
+        id: update_version
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Update version based on input type
+          if [ "${{ github.event.inputs.versionType }}" == "patch" ]; then
+            npm version patch --no-git-tag-version
+          elif [ "${{ github.event.inputs.versionType }}" == "minor" ]; then
+            npm version minor --no-git-tag-version
+          elif [ "${{ github.event.inputs.versionType }}" == "major" ]; then
+            npm version major --no-git-tag-version
+          fi
+          
+          # Get new version from package.json
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "New version: $NEW_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Get commit messages since last tag
+        id: get_commits
+        run: |
+          PREVIOUS_TAG=${{ steps.previoustag.outputs.tag }}
+          echo "Getting commits since $PREVIOUS_TAG"
+          COMMITS=$(git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s" --no-merges)
+          
+          # If no commits, use standard points
+          if [ -z "$COMMITS" ]; then
+            COMMITS="- 版本更新\n- 性能优化\n- 稳定性提升"
+          fi
+          
+          # Format commits for changelog (escape newlines for GitHub Actions)
+          FORMATTED_COMMITS="${COMMITS//$'\n'/%0A}"
+          echo "commits=$FORMATTED_COMMITS" >> $GITHUB_OUTPUT
+      
+      - name: Update CHANGELOG.md
+        run: |
+          NEW_VERSION=${{ steps.update_version.outputs.version }}
+          TODAY=$(date +"%Y-%m-%d")
+          
+          # Create new changelog entry
+          CHANGELOG_ENTRY="## [$NEW_VERSION] - $TODAY\n\n${{ steps.get_commits.outputs.commits }}"
+          
+          # Insert at top of changelog (after first line)
+          sed -i "2i\\
+          $CHANGELOG_ENTRY\\
+          " CHANGELOG.md
+      
+      - name: Package extension
+        run: npm run package
+      
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+      
+      - name: Create VSIX package
+        run: vsce package --allow-star-activation
+      
+      - name: Commit changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add package.json package-lock.json CHANGELOG.md
+          git commit -m "chore: release v${{ steps.update_version.outputs.version }} - 自动发布"
+      
+      - name: Create tag
+        run: git tag v${{ steps.update_version.outputs.version }}
+      
+      - name: Push changes and tag
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          tags: true
+      
+      - name: Publish to VS Code Marketplace
+        run: vsce publish --allow-star-activation -p ${{ secrets.VSCE_PAT }}
+      
+      - name: Upload VSIX as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: extension-vsix
+          path: "*.vsix"
