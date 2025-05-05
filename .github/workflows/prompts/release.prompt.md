@@ -1,3 +1,4 @@
+执行
 @vscode Help me update the version in package.json, auto add patch version
 
 @terminal git describe --tags --abbrev=0 | xargs -I {} sh -c 'echo "Getting commits since {}"; git log {}..HEAD --pretty=format:"- %s" --no-merges'
