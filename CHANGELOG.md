@@ -1,4 +1,8 @@
 # Change Log
+## [1.1.14] - 2025-05-05
+
+- chore: update GitHub Actions to use latest versions of actions and Node.js%0A- feat: implement GitHub Actions workflow for automated VS Code extension release
+
 
 ## [1.1.13] - 2025-05-05
 
