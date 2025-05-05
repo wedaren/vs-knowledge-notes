@@ -86,7 +86,7 @@ export class Config {
       this.workspaceConfig.update('showHiddenFiles', show, vscode.ConfigurationTarget.Global);
       this._onDidChangeConfig.fire([Config.ConfigItem.ShowHiddenFiles]);
    }
-   
+
    get gitAutoSave(): boolean {
       return this.workspaceConfig.get('gitAutoSave') ?? false;
    }

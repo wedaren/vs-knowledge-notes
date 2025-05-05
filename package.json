@@ -435,7 +435,7 @@
             },
             "daily-order.gitAutoSave": {
                "type": "boolean",
-               "default": false,
+               "default": true,
                "description": "自动将笔记变更提交到 Git 仓库并推送。"
             },
             "daily-order.gitAutoSaveInterval": {

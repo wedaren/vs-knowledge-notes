@@ -57,14 +57,15 @@ export class GitService {
           }, async (progress) => {
              const commitMsg = message || `自动保存: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
 
-             progress.report({ message: '添加更改...' });
+             //progress.report({ message: '添加更改...' });
              await this.executeCommand('git add .', directoryPath);
 
-             progress.report({ message: '提交更改...' });
+             //progress.report({ message: '提交更改...' });
              const { stdout: statusOutput } = await this.executeCommand('git status --porcelain', directoryPath);
 
              if (!statusOutput.trim()) {
-                vscode.window.showInformationMessage('没有变更需要提交');
+                //TODO: 左下角提示变更
+                //vscode.window.showInformationMessage('没有变更需要提交');
                 return;
              }
 
