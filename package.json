@@ -132,6 +132,11 @@
             "command": "daily-order.setGitAutoSaveInterval",
             "category": "Daily Order",
             "title": "Set Git Auto Save Interval"
+         },
+         {
+            "command": "vs-knowledge-notes.triggerFileCompletion",
+            "category": "Daily Order",
+            "title": "Trigger File Completion"
          }
       ],
       "keybindings": [
@@ -189,6 +194,12 @@
             "key": "ctrl+alt+s",
             "mac": "cmd+alt+s",
             "when": "config.daily-order.notesDir && editorFocus"
+         },
+         {
+            "command": "vs-knowledge-notes.triggerFileCompletion",
+            "key": "ctrl+shift+space",
+            "mac": "cmd+shift+space",
+            "when": "editorTextFocus && editorLangId == markdown"
          }
       ],
       "views": {
