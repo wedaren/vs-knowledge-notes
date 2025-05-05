@@ -91,15 +91,8 @@ export class MarkdownLinkHandler {
        }
 
        try {
-          //解析相对路径
-          const currentFile = vscode.window.activeTextEditor?.document.uri;
-          if (!currentFile) {
-             vscode.window.showErrorMessage('无法获取当前文件');
-             return;
-          }
-
           //获取当前文件的目录
-          const currentDir = path.dirname(currentFile.fsPath);
+          const currentDir = this.config.notesDir.path;
 
           //构建目标文件的完整路径
           const targetPath = path.resolve(currentDir, link);
@@ -109,7 +102,7 @@ export class MarkdownLinkHandler {
           try {
              await vscode.workspace.fs.stat(targetUri);
           } catch (error) {
-             vscode.window.showErrorMessage(`文件不存在: ${targetPath}`);
+             vscode.window.showErrorMessage(`文件不存在: ${error}`);
              return;
           }
 
