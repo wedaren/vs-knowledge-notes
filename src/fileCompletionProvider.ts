@@ -89,8 +89,7 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
              completionItem.filterText = `>>${fileName}`;
 
              //设置插入文本为Markdown链接格式
-             const encodedRelativePath = file.replace(/ /g, '\\\ ');
-             const markdownLink = `[${fileName}](${encodedRelativePath})`;
+             const markdownLink = `[${fileName}](${relativePath})`;
              completionItem.insertText = markdownLink;
 
              //设置替换范围从">>"到关键字结束位置

@@ -9,6 +9,7 @@ import { Watcher } from './watcher';
 import { Search } from './search';
 import { GitAutoSaveManager } from './gitAutoSaveManager';
 import { FileCompletionProvider } from './fileCompletionProvider';
+import { MarkdownLinkHandler } from './markdownLinkHandler';
 
 export function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
@@ -32,6 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
       }
    });
 
+   // 注册 Markdown 链接处理器
+   const markdownLinkHandler = new MarkdownLinkHandler();
+
    context.subscriptions.push(
       watcher,
       Config.getInstance().setListener(),
@@ -42,6 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
       gitAutoSaveManager,
       completionProvider,
       triggerCompletionCommand,
+      markdownLinkHandler,
       ...registerCommands(fileSystemProvider)
    );
 }

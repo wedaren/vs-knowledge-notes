@@ -137,6 +137,10 @@
             "command": "vs-knowledge-notes.triggerFileCompletion",
             "category": "Daily Order",
             "title": "Trigger File Completion"
+         },
+         {
+            "command": "vs-knowledge-notes.openMarkdownLink",
+            "title": "Open Markdown Link"
          }
       ],
       "keybindings": [
@@ -381,6 +385,12 @@
             {
                "command": "daily-order.noteExplorer.delete",
                "when": "false"
+            }
+         ],
+         "markdown/links": [
+            {
+               "command": "vs-knowledge-notes.openMarkdownLink",
+               "when": "editorLangId == markdown"
             }
          ]
       },
