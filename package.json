@@ -204,6 +204,11 @@
             "key": "ctrl+shift+space",
             "mac": "cmd+shift+space",
             "when": "editorTextFocus && editorLangId == markdown"
+         },
+         {
+            "command": "daily-order.focusOnTodayOrderNote",
+            "key": "ctrl+t",
+            "override": true
          }
       ],
       "views": {
