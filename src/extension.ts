@@ -22,23 +22,23 @@ export function activate(context: vscode.ExtensionContext) {
    const gitAutoSaveManager = GitAutoSaveManager.getInstance();
    const autoSaveManager = AutoSaveManager.getInstance();
 
-   // 注册文件补全提供者
+   //注册文件补全提供者
    const fileCompletionProvider = new FileCompletionProvider();
    const completionProvider = vscode.languages.registerCompletionItemProvider(
       { scheme: 'file', language: 'markdown' },
       fileCompletionProvider,
-      '>>' // 触发字符
+      '>>' //触发字符
    );
 
-   // 注册时间戳辅助功能
+   //注册时间戳辅助功能
    const timestampAssistant = new TimestampAssistant();
    const timestampProvider = vscode.languages.registerCompletionItemProvider(
       { scheme: 'file', language: 'markdown' },
       timestampAssistant,
-      't' // 触发字符
+      't' //触发字符
    );
 
-   // 注册命令以手动触发补全
+   //注册命令以手动触发补全
    const triggerCompletionCommand = vscode.commands.registerCommand('vs-knowledge-notes.triggerFileCompletion', () => {
       const editor = vscode.window.activeTextEditor;
       if (editor) {
@@ -46,12 +46,12 @@ export function activate(context: vscode.ExtensionContext) {
       }
    });
 
-   // 注册检查并创建文件的命令
+   //注册检查并创建文件的命令
    const checkAndCreateFileCommand = vscode.commands.registerCommand('vs-knowledge-notes.checkAndCreateFile', async (filePath: string) => {
       console.log(`检查文件是否存在: ${filePath}`);
-      
+
       if (!fs.existsSync(filePath)) {
-         // 确保目录存在
+         //确保目录存在
          const dirPath = path.dirname(filePath);
          if (!fs.existsSync(dirPath)) {
             try {
@@ -63,16 +63,16 @@ export function activate(context: vscode.ExtensionContext) {
                return;
             }
          }
-         
-         // 创建文件
+
+         //创建文件
          try {
             const fileName = path.basename(filePath, '.md');
             const content = `# ${fileName}\n\n`;
             fs.writeFileSync(filePath, content, 'utf8');
             console.log(`创建文件成功: ${filePath}`);
             vscode.window.showInformationMessage(`文件不存在，已创建: ${filePath}`);
-            
-            // 打开新创建的文件
+
+            //打开新创建的文件
             const document = await vscode.workspace.openTextDocument(filePath);
             await vscode.window.showTextDocument(document);
          } catch (error) {
@@ -82,7 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
    });
 
-   // 注册 Markdown 链接处理器
+   //注册 Markdown 链接处理器
    const markdownLinkHandler = new MarkdownLinkHandler();
 
    context.subscriptions.push(
@@ -104,6 +104,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-   // 清理资源
+   //清理资源
    AutoSaveManager.getInstance().dispose();
 }

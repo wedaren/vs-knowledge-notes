@@ -82,7 +82,7 @@ async function saveToGitNow() {
       vscode.window.showErrorMessage('笔记目录未设置');
       return;
    }
-   
+
    await GitAutoSaveManager.getInstance().saveNow();
 }
 
@@ -92,14 +92,14 @@ async function saveToGitNow() {
 async function setGitAutoSaveInterval() {
    const options = ['1分钟', '5分钟', '10分钟', '15分钟', '30分钟', '1小时', '2小时', '4小时', '12小时', '24小时'];
    const intervalValues = [1, 5, 10, 15, 30, 60, 120, 240, 720, 1440];
-   
+
    const selected = await vscode.window.showQuickPick(options, {
       placeHolder: '请选择自动保存时间间隔',
       canPickMany: false
    });
-   
+
    if (!selected) return;
-   
+
    const index = options.indexOf(selected);
    if (index !== -1) {
       config.gitAutoSaveInterval = intervalValues[index];
