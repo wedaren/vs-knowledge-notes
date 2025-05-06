@@ -1,24 +1,33 @@
-执行
-@vscode Help me update the version in package.json, auto add patch version
+# VS Code 扩展发布流程
 
-@terminal git describe --tags --abbrev=0 | xargs -I {} sh -c 'echo "Getting commits since {}"; git log {}..HEAD --pretty=format:"- %s" --no-merges'
+## 准备工作
 
-@vscode Update CHANGELOG.md with the following:
-1. Add a new section at the top using format: ## [x.y.z] - YYYY-MM-DD
-2. Use today's date in YYYY-MM-DD format
-3. Add commit messages from above as changelog entries
-   (Format and group similar commits, remove commit prefixes like "fix:", "feat:" if needed)
-   (If no specific commits are available, use standard points: 版本更新, 性能优化, 稳定性提升)
+@vscode 请帮助我在 package.json 中更新版本号，自动增加补丁版本号 (patch version)
 
-@terminal Check if vsce is installed globally, then package the current VS Code extension project in the workspace root with --allow-star-activation flag.
+@terminal echo "正在获取最近的 Git 标签版本..." && git describe --tags --abbrev=0 | xargs -I {} sh -c 'echo "获取 {} 之后的所有提交:"; git log {}..HEAD --pretty=format:"- %s" --no-merges | cat'
 
-@terminal Add changes to git with "git add package.json package-lock.json CHANGELOG.md"
+## 更新 CHANGELOG
 
-@terminal Create a commit with message using format: "git commit -m 'chore: release vX.Y.Z - CHANGELOG内容概述'"
+@vscode 请按以下格式更新 CHANGELOG.md：
 
-@terminal Create a git tag for the new version, e.g.: "git tag vX.Y.Z"
+1. 在顶部添加新的部分，使用格式：## [x.y.z] - YYYY-MM-DD
+2. 使用今天的日期，格式为 YYYY-MM-DD
+3. 添加来自上面获取的提交信息作为更新日志条目
+   - 格式化并分组相似的提交
+   - 必要时删除提交前缀，如 "fix:"、"feat:" 等
+   - 如果没有特定的提交信息可用，则使用标准点：版本更新、性能优化、稳定性提升
 
-@terminal Push the commit and tag to remote repository, e.g.: "git push && git push --tags"
+## 打包与发布
 
-@terminal Publish the current VS Code extension as a new patch version using vsce with --allow-star-activation flag. Assume I am already logged in with vsce login.
+@terminal echo "正在打包扩展..." && npx vsce package --allow-star-activation
+
+@terminal echo "正在将更改添加到 Git..." && git add package.json package-lock.json CHANGELOG.md
+
+@terminal LATEST_VERSION=$(node -p "require('./package.json').version") && echo "正在创建提交..." && git commit -m "chore: release v$LATEST_VERSION - 版本更新"
+
+@terminal LATEST_VERSION=$(node -p "require('./package.json').version") && echo "正在创建标签 v$LATEST_VERSION..." && git tag v$LATEST_VERSION
+
+@terminal echo "正在推送提交和标签到远程仓库..." && git push && git push --tags
+
+@terminal echo "正在发布扩展到 VS Code 市场..." && npx vsce publish --allow-star-activation
 
