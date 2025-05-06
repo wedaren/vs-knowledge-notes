@@ -46,10 +46,7 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
           return [];
        }
 
-       const { keyword, startPosition, endPosition } = match;
-       console.log(`提取的关键字: "${keyword}"`);
-       console.log(`起始位置: ${startPosition.line}:${startPosition.character}`);
-       console.log(`结束位置: ${endPosition.line}:${endPosition.character}`);
+       const { keyword, prefix, startPosition, endPosition } = match;
 
        const notesDir = this.config.notesDir;
        if (!notesDir) {
@@ -81,7 +78,7 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
              completionItem.documentation = new vscode.MarkdownString(`完整路径: ${file}`);
 
              //设置过滤文本，使其支持在任意位置匹配
-             completionItem.filterText = `>>${relativePath}`;
+             completionItem.filterText = `${prefix}${relativePath}`;
 
              //设置插入文本为Markdown链接格式
              const markdownLink = `[${fileName}](${relativePath})`;
@@ -119,23 +116,23 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
     }
 
     //从文本中提取过滤关键字和起始位置
-    private extractFilterKeyword(text: string, line: number): { keyword: string, startPosition: vscode.Position, endPosition: vscode.Position } | null {
-       //检查是否包含">>"
-       const lastIndex = text.lastIndexOf('>>');
-
+    private extractFilterKeyword(text: string, line: number): { keyword: string, prefix: string, startPosition: vscode.Position, endPosition: vscode.Position } | null {
+       const lastIndex1 = text.lastIndexOf('>>');
+       const lastIndex2 = text.lastIndexOf('》》');
+       const lastIndex = Math.max(lastIndex1, lastIndex2);
        if (lastIndex !== -1) {
           //提取">>"后面的文本直到空格
-          const afterArrow = text.substring(lastIndex + 2);
+          const prefix = lastIndex === lastIndex1 ? '>>' : '》》';
+          const prefixLength = prefix.length;
+          const afterArrow = text.substring(lastIndex + prefixLength);
           const spaceIndex = afterArrow.indexOf(' ');
           const keyword = spaceIndex === -1 ? afterArrow : afterArrow.substring(0, spaceIndex);
 
-          console.log(`提取的关键字(>>模式): "${keyword}"`);
-
           //计算起始位置和结束位置
           const startPosition = new vscode.Position(line, lastIndex);
-          const endPosition = new vscode.Position(line, lastIndex + 2 + keyword.length);
+          const endPosition = new vscode.Position(line, lastIndex + prefixLength + keyword.length);
 
-          return { keyword, startPosition, endPosition };
+          return { keyword, startPosition, endPosition, prefix };
        }
 
        return null;

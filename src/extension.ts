@@ -27,7 +27,8 @@ export function activate(context: vscode.ExtensionContext) {
    const completionProvider = vscode.languages.registerCompletionItemProvider(
       { scheme: 'file', language: 'markdown' },
       fileCompletionProvider,
-      '>>' //触发字符
+      '>>', //触发字符
+      '》》' //新增触发字符
    );
 
    //注册时间戳辅助功能
