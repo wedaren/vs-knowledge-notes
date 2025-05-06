@@ -1,4 +1,12 @@
 # Change Log
+## [1.1.15] - 2025-05-06
+
+- 新增：自动保存 markdown 文件功能
+- 新增：Git 更改自动保存功能
+- 新增：添加 MCP 配置用于顺序思维服务器
+- 优化：添加 vscode-markdownlint 扩展依赖
+- 优化：更新项目依赖项
+
 ## [1.1.14] - 2025-05-05
 
 - chore: update GitHub Actions to use latest versions of actions and Node.js%0A- feat: implement GitHub Actions workflow for automated VS Code extension release
