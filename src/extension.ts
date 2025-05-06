@@ -12,12 +12,14 @@ import { Search } from './search';
 import { GitAutoSaveManager } from './gitAutoSaveManager';
 import { FileCompletionProvider } from './fileCompletionProvider';
 import { MarkdownLinkHandler } from './markdownLinkHandler';
+import { AutoSaveManager } from './autoSaveManager';
 
 export function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
    const watcher = Watcher.getInstance();
    watcher.watch(fileSystemProvider);
    const gitAutoSaveManager = GitAutoSaveManager.getInstance();
+   const autoSaveManager = AutoSaveManager.getInstance();
 
    // 注册文件补全提供者
    const fileCompletionProvider = new FileCompletionProvider();
@@ -82,6 +84,7 @@ export function activate(context: vscode.ExtensionContext) {
       new TagExplorer(fileSystemProvider),
       new Search(),
       gitAutoSaveManager,
+      autoSaveManager,
       completionProvider,
       triggerCompletionCommand,
       checkAndCreateFileCommand,
@@ -90,4 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
    );
 }
 
-export function deactivate() { }
+export function deactivate() {
+   // 清理资源
+   AutoSaveManager.getInstance().dispose();
+}
