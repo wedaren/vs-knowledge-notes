@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { Config } from './config';
 import { extensionName } from './constants';
+import { focusOnFile } from './commands';
 
 export class MarkdownLinkHandler {
     private config: Config;
@@ -90,28 +91,10 @@ export class MarkdownLinkHandler {
           return;
        }
 
-       try {
-          //获取当前文件的目录
-          const currentDir = this.config.notesDir.path;
+       const targetPath = path.resolve(this.config.notesDir.path, link);
+       const targetUri = vscode.Uri.file(targetPath);
 
-          //构建目标文件的完整路径
-          const targetPath = path.resolve(currentDir, link);
-          const targetUri = vscode.Uri.file(targetPath);
-
-          //检查文件是否存在
-          try {
-             await vscode.workspace.fs.stat(targetUri);
-          } catch (error) {
-             vscode.window.showErrorMessage(`文件不存在: ${error}`);
-             return;
-          }
-
-          //打开文件
-          const document = await vscode.workspace.openTextDocument(targetUri);
-          await vscode.window.showTextDocument(document, { preview: false });
-       } catch (error) {
-          vscode.window.showErrorMessage(`打开链接时出错: ${error}`);
-       }
+       await focusOnFile(targetUri);
     }
 
     dispose() {

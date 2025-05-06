@@ -28,7 +28,7 @@ function toggleDisplayMode() {
  * @param filePath 目标文件的绝对路径
  * @param options 可选参数，用于控制打开行为，例如指定在哪一列打开，是否预览，以及初始光标位置
  */
-async function focusOnFile(fileUri: vscode.Uri, options?: { viewColumn?: vscode.ViewColumn, selection?: vscode.Range }): Promise<void> {
+export async function focusOnFile(fileUri: vscode.Uri, options?: { viewColumn?: vscode.ViewColumn, selection?: vscode.Range }): Promise<void> {
    try {
       await vscode.workspace.fs.stat(fileUri);
       const document = await vscode.workspace.openTextDocument(fileUri);
