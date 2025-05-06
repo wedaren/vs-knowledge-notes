@@ -13,6 +13,7 @@ import { GitAutoSaveManager } from './gitAutoSaveManager';
 import { FileCompletionProvider } from './fileCompletionProvider';
 import { MarkdownLinkHandler } from './markdownLinkHandler';
 import { AutoSaveManager } from './autoSaveManager';
+import { TimestampAssistant } from './assistants/timestampAssistant';
 
 export function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
@@ -27,6 +28,14 @@ export function activate(context: vscode.ExtensionContext) {
       { scheme: 'file', language: 'markdown' },
       fileCompletionProvider,
       '>>' // 触发字符
+   );
+
+   // 注册时间戳辅助功能
+   const timestampAssistant = new TimestampAssistant();
+   const timestampProvider = vscode.languages.registerCompletionItemProvider(
+      { scheme: 'file', language: 'markdown' },
+      timestampAssistant,
+      't' // 触发字符
    );
 
    // 注册命令以手动触发补全
@@ -86,6 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
       gitAutoSaveManager,
       autoSaveManager,
       completionProvider,
+      timestampProvider,
       triggerCompletionCommand,
       checkAndCreateFileCommand,
       markdownLinkHandler,
