@@ -447,7 +447,7 @@
       }
    },
    "extensionDependencies": [
-      "shd101wyy.markdown-preview-enhanced"
+      "yzhang.markdown-all-in-one"
    ],
    "scripts": {
       "vscode:prepublish": "npm run package",
