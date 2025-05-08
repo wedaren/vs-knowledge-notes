@@ -139,6 +139,21 @@
             "title": "Trigger File Completion"
          },
          {
+            "command": "daily-order.triggerPromptCompletion",
+            "category": "Daily Order",
+            "title": "Trigger Prompt Completion"
+         },
+         {
+            "command": "daily-order.toggleDebugMode",
+            "category": "Daily Order",
+            "title": "Toggle Debug Mode"
+         },
+         {
+            "command": "daily-order.showDebugPanel",
+            "category": "Daily Order",
+            "title": "Show Debug Panel"
+         },
+         {
             "command": "vs-knowledge-notes.openMarkdownLink",
             "title": "Open Markdown Link"
          }
@@ -447,6 +462,16 @@
                "type": "number",
                "default": 30,
                "description": "Git 自动保存的间隔时间（分钟）。"
+            },
+            "daily-order.promptsDir": {
+               "type": "string",
+               "default": "",
+               "description": "自定义的 prompts 目录路径。如果为空，将使用笔记目录下的 prompts 文件夹。"
+            },
+            "daily-order.enableDebug": {
+               "type": "boolean",
+               "default": false,
+               "description": "启用调试模式，将会在输出面板显示详细的调试信息。"
             }
          }
       }

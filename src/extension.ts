@@ -14,6 +14,7 @@ import { FileCompletionProvider } from './fileCompletionProvider';
 import { MarkdownLinkHandler } from './markdownLinkHandler';
 import { AutoSaveManager } from './autoSaveManager';
 import { TimestampAssistant } from './assistants/timestampAssistant';
+import { PromptCompletionProvider } from './promptCompletionProvider';
 
 export function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
@@ -21,14 +22,55 @@ export function activate(context: vscode.ExtensionContext) {
    watcher.watch(fileSystemProvider);
    const gitAutoSaveManager = GitAutoSaveManager.getInstance();
    const autoSaveManager = AutoSaveManager.getInstance();
+   //注册 prompt 补全功能
+   const promptCompletionProvider = new PromptCompletionProvider();
+   const promptProvider = vscode.languages.registerCompletionItemProvider(
+      { scheme: 'file', language: 'markdown' },
+      promptCompletionProvider,
+      ']]'
+   );
+   
+   //注册命令以手动触发 prompt 补全
+   const triggerPromptCompletionCommand = vscode.commands.registerCommand('daily-order.triggerPromptCompletion', () => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+         vscode.commands.executeCommand('editor.action.triggerSuggest');
+      }
+   });
+   
+   //注册调试相关命令
+   const toggleDebugCommand = vscode.commands.registerCommand('daily-order.toggleDebugMode', async () => {
+      const config = vscode.workspace.getConfiguration('daily-order');
+      const currentValue = config.get('enableDebug', false);
+      
+      //反转当前值
+      await config.update('enableDebug', !currentValue, vscode.ConfigurationTarget.Global);
+      
+      //更新 promptCompletionProvider 的调试状态
+      promptCompletionProvider.toggleDebug(!currentValue);
+      
+      //通知用户
+      vscode.window.showInformationMessage(
+         `调试模式已${!currentValue ? '启用' : '禁用'}`
+      );
+      
+      //如果启用了调试，自动显示输出面板
+      if (!currentValue) {
+         promptCompletionProvider.showDebugPanel();
+      }
+   });
+   
+   const showDebugPanelCommand = vscode.commands.registerCommand('daily-order.showDebugPanel', () => {
+      promptCompletionProvider.showDebugPanel();
+   });
 
    //注册文件补全提供者
    const fileCompletionProvider = new FileCompletionProvider();
    const completionProvider = vscode.languages.registerCompletionItemProvider(
       { scheme: 'file', language: 'markdown' },
       fileCompletionProvider,
-      '>>', //触发字符
-      '》》' //新增触发字符
+      '>', //触发字符
+      '》' //新增触发字符
    );
 
    //注册时间戳辅助功能
@@ -38,7 +80,6 @@ export function activate(context: vscode.ExtensionContext) {
       timestampAssistant,
       't' //触发字符
    );
-
    //注册命令以手动触发补全
    const triggerCompletionCommand = vscode.commands.registerCommand('vs-knowledge-notes.triggerFileCompletion', () => {
       const editor = vscode.window.activeTextEditor;
@@ -97,7 +138,11 @@ export function activate(context: vscode.ExtensionContext) {
       autoSaveManager,
       completionProvider,
       timestampProvider,
+      promptProvider,
       triggerCompletionCommand,
+      triggerPromptCompletionCommand,
+      toggleDebugCommand,
+      showDebugPanelCommand,
       checkAndCreateFileCommand,
       markdownLinkHandler,
       ...registerCommands(fileSystemProvider)

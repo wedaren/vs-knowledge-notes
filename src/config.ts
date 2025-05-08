@@ -22,7 +22,7 @@ export class Config {
       this.hasSetListener = true;
       return vscode.workspace.onDidChangeConfiguration(() => {
          this.loadWorkspaceConfig();
-         this._onDidChangeConfig.fire([Config.ConfigItem.NotesDir, Config.ConfigItem.ConfirmDelete, Config.ConfigItem.PreviewEngine, Config.ConfigItem.SinglePreview, Config.ConfigItem.ShowHiddenFiles, Config.ConfigItem.GitAutoSave, Config.ConfigItem.GitAutoSaveInterval]);
+         this._onDidChangeConfig.fire([Config.ConfigItem.NotesDir, Config.ConfigItem.ConfirmDelete, Config.ConfigItem.PreviewEngine, Config.ConfigItem.SinglePreview, Config.ConfigItem.ShowHiddenFiles, Config.ConfigItem.GitAutoSave, Config.ConfigItem.GitAutoSaveInterval, Config.ConfigItem.PromptsDir]);
       });
    }
 
@@ -105,6 +105,15 @@ export class Config {
       this._onDidChangeConfig.fire([Config.ConfigItem.GitAutoSaveInterval]);
    }
 
+   get promptsDir(): string | undefined {
+      return this.workspaceConfig.get<string>('promptsDir') || undefined;
+   }
+
+   set promptsDir(path: string | undefined) {
+      this.workspaceConfig.update('promptsDir', path, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.PromptsDir]);
+   }
+
    //#endregion
 
    private _displayMode: DisplayMode = DisplayMode.Edit;
@@ -155,7 +164,8 @@ export namespace Config {
       IsEmptyNotesDir: 'isEmptyNotesDir',
       ShowHiddenFiles: 'showHiddenFiles',
       GitAutoSave: 'gitAutoSave',
-      GitAutoSaveInterval: 'gitAutoSaveInterval'
+      GitAutoSaveInterval: 'gitAutoSaveInterval',
+      PromptsDir: 'promptsDir'
    } as const;
    export const PreviewEngine = {
       Default: 'default',
