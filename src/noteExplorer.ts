@@ -4,6 +4,7 @@ import { FileSystemProvider, File } from './fileSystemProvider';
 import { Config } from './config';
 import { DisplayMode } from './types';
 import { isChild } from './utils';
+import dayjs = require('dayjs');
 
 type Clipboard = { uris: vscode.Uri[], cut: boolean };
 
@@ -95,10 +96,12 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
 
 export class NoteExplorer {
 
+
    private readonly treeDataProvider: TreeDataProvider;
    private readonly treeView: vscode.TreeView<File>;
    private readonly config: Config = Config.getInstance();
    private readonly disposables: vscode.Disposable[] = [];
+   private readonly todayOrderDir: string = 'TodayOrder';
    private clipboard?: Clipboard;
 
    constructor(private readonly fileSystemProvider: FileSystemProvider) {
@@ -117,6 +120,25 @@ export class NoteExplorer {
          }),
          ...this.registerCommands()
       );
+   }
+
+   async focusOnTodayOrderNote() {
+      const notesDir = Config.getInstance().notesDir;
+      if (!notesDir) {
+         vscode.window.showErrorMessage('Notes directory is not set.');
+         return;
+      }
+      const folderUri = vscode.Uri.joinPath(notesDir, this.todayOrderDir);
+      if (! this.fileSystemProvider.exists(folderUri)) {
+         await this.fileSystemProvider.createDirectory(folderUri);
+      }
+
+      const noteFileName = dayjs().format('YYYY-MM-DD') + '.md';
+      const noteFileUri = vscode.Uri.joinPath(folderUri, noteFileName);
+      if (! this.fileSystemProvider.exists(noteFileUri)) {
+         await this.fileSystemProvider.writeFile(noteFileUri, new Uint8Array(), { create: true, overwrite: false });
+      }
+      await this.revealFile(noteFileUri);
    }
 
    dispose(): void {
@@ -141,16 +163,16 @@ export class NoteExplorer {
          vscode.commands.registerCommand('daily-order.noteExplorer.copyRelativePath', (file?: File) => this.copyRelativePath(file)),
          vscode.commands.registerCommand('daily-order.noteExplorer.rename', (file?: File) => this.rename(file)),
          vscode.commands.registerCommand('daily-order.noteExplorer.delete', (file?: File) => this.delete(file)),
-         vscode.commands.registerCommand('daily-order.noteExplorer.reveal', async(uri: vscode.Uri) => this.revealFile(uri))
+         vscode.commands.registerCommand('daily-order.noteExplorer.reveal', async(uri: vscode.Uri) => this.revealFile(uri)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.focusOnTodayOrderNote', () => this.focusOnTodayOrderNote()),
       ];
    }
    private async revealFile(uri?: vscode.Uri): Promise<void> {
       if (!uri) return;
 
-      this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
+      await this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
       const document = await vscode.workspace.openTextDocument(uri);
       await vscode.window.showTextDocument(document);
-
    }
 
    private async showFileNameInputBox(dirname?: vscode.Uri, initialValue?: string): Promise<string | undefined> {

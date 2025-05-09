@@ -28,7 +28,7 @@
             "title": "Set Notes Directory"
          },
          {
-            "command": "daily-order.focusOnTodayOrderNote",
+            "command": "daily-order.noteExplorer.focusOnTodayOrderNote",
             "category": "Daily Order",
             "title": "Focus On Today Order Note"
          },
@@ -221,7 +221,7 @@
             "when": "editorTextFocus && editorLangId == markdown"
          },
          {
-            "command": "daily-order.focusOnTodayOrderNote",
+            "command": "daily-order.noteExplorer.focusOnTodayOrderNote",
             "key": "ctrl+t",
             "override": true
          }

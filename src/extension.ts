@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
 import * as path from 'path';
 import { NoteExplorer } from './noteExplorer';
 import { registerCommands } from './commands';
@@ -91,17 +90,18 @@ export function activate(context: vscode.ExtensionContext) {
    //注册检查并创建文件的命令
    const checkAndCreateFileCommand = vscode.commands.registerCommand('vs-knowledge-notes.checkAndCreateFile', async (filePath: string) => {
       console.log(`检查文件是否存在: ${filePath}`);
+      const fileUri = vscode.Uri.file(filePath);
 
-      if (!fs.existsSync(filePath)) {
+      if (!await fileSystemProvider.exists(fileUri)) {
          //确保目录存在
-         const dirPath = path.dirname(filePath);
-         if (!fs.existsSync(dirPath)) {
+         const dirUri = vscode.Uri.file(path.dirname(filePath));
+         if (!await fileSystemProvider.exists(dirUri)) {
             try {
-               fs.mkdirSync(dirPath, { recursive: true });
-               console.log(`创建目录成功: ${dirPath}`);
+               await fileSystemProvider.createDirectory(dirUri);
+               console.log(`创建目录成功: ${dirUri.fsPath}`);
             } catch (error) {
-               console.error(`创建目录失败: ${dirPath}`, error);
-               vscode.window.showErrorMessage(`创建目录失败: ${dirPath}`);
+               console.error(`创建目录失败: ${dirUri.fsPath}`, error);
+               vscode.window.showErrorMessage(`创建目录失败: ${dirUri.fsPath}`);
                return;
             }
          }
@@ -110,12 +110,12 @@ export function activate(context: vscode.ExtensionContext) {
          try {
             const fileName = path.basename(filePath, '.md');
             const content = `# ${fileName}\n\n`;
-            fs.writeFileSync(filePath, content, 'utf8');
+            await fileSystemProvider.writeFile(fileUri, Buffer.from(content, 'utf8'), { create: true, overwrite: false });
             console.log(`创建文件成功: ${filePath}`);
             vscode.window.showInformationMessage(`文件不存在，已创建: ${filePath}`);
 
             //打开新创建的文件
-            const document = await vscode.workspace.openTextDocument(filePath);
+            const document = await vscode.workspace.openTextDocument(fileUri);
             await vscode.window.showTextDocument(document);
          } catch (error) {
             console.error(`创建文件失败: ${filePath}`, error);
@@ -126,11 +126,12 @@ export function activate(context: vscode.ExtensionContext) {
 
    //注册 Markdown 链接处理器
    const markdownLinkHandler = new MarkdownLinkHandler();
+   const noteExplorer = new NoteExplorer(fileSystemProvider);
 
    context.subscriptions.push(
       watcher,
       Config.getInstance().setListener(),
-      new NoteExplorer(fileSystemProvider),
+      noteExplorer,
       new StatusBar(),
       new TagExplorer(fileSystemProvider),
       new Search(),
@@ -145,7 +146,7 @@ export function activate(context: vscode.ExtensionContext) {
       showDebugPanelCommand,
       checkAndCreateFileCommand,
       markdownLinkHandler,
-      ...registerCommands(fileSystemProvider)
+      ...registerCommands()
    );
 }
 
