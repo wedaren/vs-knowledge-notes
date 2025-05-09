@@ -169,10 +169,10 @@ export class NoteExplorer {
 
    private geSelectedFiles(rightClickedFile?: File): File[] | undefined {
       if (!this.config.notesDir) return undefined;
-      if (!rightClickedFile) return this.treeView.selection.length ? this.treeView.selection : [new File(this.config.notesDir, vscode.FileType.Directory)];
+      if (!rightClickedFile) return this.treeView.selection.length ? [...this.treeView.selection] : [new File(this.config.notesDir, vscode.FileType.Directory)];
       if (!this.treeView.selection.length) return [rightClickedFile];
       if (this.treeView.selection.findIndex(selectedFile => selectedFile.uri.fsPath === rightClickedFile.uri.fsPath) === -1) return [rightClickedFile];
-      else return this.treeView.selection;
+      else return [...this.treeView.selection];
    }
 
    private async openFile(uri?: vscode.Uri): Promise<void> {
