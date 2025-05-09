@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { Config } from './config';
-import { extensionName } from './constants';
 import { FileSystemProvider } from './fileSystemProvider';
 import dayjs = require('dayjs');
 import { GitService } from './gitService';
@@ -23,26 +22,6 @@ function toggleDisplayMode() {
 }
 
 
-/**
- * 打开并聚焦到指定的文件路径
- * @param filePath 目标文件的绝对路径
- * @param options 可选参数，用于控制打开行为，例如指定在哪一列打开，是否预览，以及初始光标位置
- */
-export async function focusOnFile(fileUri: vscode.Uri, options?: { viewColumn?: vscode.ViewColumn, selection?: vscode.Range }): Promise<void> {
-   try {
-      await vscode.workspace.fs.stat(fileUri);
-      const document = await vscode.workspace.openTextDocument(fileUri);
-      await vscode.commands.executeCommand('daily-order.noteExplorer.reveal', fileUri);
-      await vscode.window.showTextDocument(document, {
-         viewColumn: options?.viewColumn,
-         preview: false,
-         selection: options?.selection
-      });
-
-   } catch (error) {
-      vscode.window.showErrorMessage(`打开或聚焦文件时出错: ${fileUri.path}. 错误: ${error}`);
-   }
-}
 
 async function focusOnTodayOrderNote(fileSystemProvider: FileSystemProvider) {
    const notesDir = Config.getInstance().notesDir;
@@ -62,7 +41,7 @@ async function focusOnTodayOrderNote(fileSystemProvider: FileSystemProvider) {
    if (!fileSystemProvider.exists(noteFileUri)) {
       await fileSystemProvider.writeFile(noteFileUri, new Uint8Array(), { create: true, overwrite: false });
    }
-   focusOnFile(noteFileUri);
+   await vscode.commands.executeCommand('daily-order.noteExplorer.reveal', noteFileUri);
 }
 
 /**
@@ -109,11 +88,11 @@ async function setGitAutoSaveInterval() {
 
 export function registerCommands(fileSystemProvider: FileSystemProvider): vscode.Disposable[] {
    return [
-      vscode.commands.registerCommand(`${extensionName}.setNotesDir`, () => setNotesDir()),
-      vscode.commands.registerCommand(`${extensionName}.toggleDisplayMode`, () => toggleDisplayMode()),
-      vscode.commands.registerCommand(`${extensionName}.focusOnTodayOrderNote`, () => focusOnTodayOrderNote(fileSystemProvider)),
-      vscode.commands.registerCommand(`${extensionName}.toggleGitAutoSave`, () => toggleGitAutoSave()),
-      vscode.commands.registerCommand(`${extensionName}.saveToGitNow`, () => saveToGitNow()),
-      vscode.commands.registerCommand(`${extensionName}.setGitAutoSaveInterval`, () => setGitAutoSaveInterval())
+      vscode.commands.registerCommand('daily-order.setNotesDir', () => setNotesDir()),
+      vscode.commands.registerCommand('daily-order.toggleDisplayMode', () => toggleDisplayMode()),
+      vscode.commands.registerCommand('daily-order.focusOnTodayOrderNote', () => focusOnTodayOrderNote(fileSystemProvider)),
+      vscode.commands.registerCommand('daily-order.toggleGitAutoSave', () => toggleGitAutoSave()),
+      vscode.commands.registerCommand('daily-order.saveToGitNow', () => saveToGitNow()),
+      vscode.commands.registerCommand('daily-order.setGitAutoSaveInterval', () => setGitAutoSaveInterval())
    ];
 }

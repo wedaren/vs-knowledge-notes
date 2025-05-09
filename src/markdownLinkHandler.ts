@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { Config } from './config';
-import { extensionName } from './constants';
-import { focusOnFile } from './commands';
 
 export class MarkdownLinkHandler {
     private config: Config;
@@ -25,7 +23,7 @@ export class MarkdownLinkHandler {
 
        //注册命令来处理链接点击
        this.disposables.push(
-          vscode.commands.registerCommand(`${extensionName}.openMarkdownLink`, (link: string) => {
+          vscode.commands.registerCommand('daily-order.openMarkdownLink', (link: string) => {
              this.openLink(link);
           })
        );
@@ -68,7 +66,7 @@ export class MarkdownLinkHandler {
 
           const link = new vscode.DocumentLink(
              new vscode.Range(startPos, endPos),
-             vscode.Uri.parse(`command:${extensionName}.openMarkdownLink?${encodeURIComponent(JSON.stringify(linkPath))}`)
+             vscode.Uri.parse(`command:daily-order.openMarkdownLink?${encodeURIComponent(JSON.stringify(linkPath))}`)
           );
           links.push(link);
        }
@@ -93,8 +91,7 @@ export class MarkdownLinkHandler {
 
        const targetPath = path.resolve(this.config.notesDir.path, link);
        const targetUri = vscode.Uri.file(targetPath);
-
-       await focusOnFile(targetUri);
+       await vscode.commands.executeCommand('daily-order.noteExplorer.reveal', targetUri);
     }
 
     dispose() {

@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { FileSystemProvider, File } from './fileSystemProvider';
 import { Config } from './config';
-import { extensionName } from './constants';
 import { DisplayMode } from './types';
 import { isChild } from './utils';
 
@@ -37,11 +36,11 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
     * Checks if file or directory should be hidden
     */
    private shouldHide(name: string): boolean {
-      // If showHiddenFiles is true, don't hide any files based on name
+      //If showHiddenFiles is true, don't hide any files based on name
       if (this.config.showHiddenFiles) {
          return false;
       }
-      // Hide files/directories starting with .
+      //Hide files/directories starting with .
       return name.startsWith('.');
    }
 
@@ -62,7 +61,7 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
             return a[1] === vscode.FileType.Directory ? -1 : 1;
          });
 
-         // Filter out invisible files/directories and binary files
+         //Filter out invisible files/directories and binary files
          const filteredChildren = children.filter(([name]) => {
             const basename = path.basename(name);
             if (this.shouldHide(basename)) return false;
@@ -82,7 +81,7 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
 
       this.config.isEmptyNotesDir = !children.length;
 
-      // Filter out invisible files/directories and binary files
+      //Filter out invisible files/directories and binary files
       const filteredChildren = children.filter(([name]) => {
          const basename = path.basename(name);
          if (this.shouldHide(basename)) return false;
@@ -104,7 +103,7 @@ export class NoteExplorer {
 
    constructor(private readonly fileSystemProvider: FileSystemProvider) {
       this.treeDataProvider = new TreeDataProvider(fileSystemProvider);
-      this.treeView = vscode.window.createTreeView(`${extensionName}.noteExplorer`, { treeDataProvider: this.treeDataProvider, canSelectMany: true, showCollapseAll: true });
+      this.treeView = vscode.window.createTreeView('daily-order.noteExplorer', { treeDataProvider: this.treeDataProvider, canSelectMany: true, showCollapseAll: true });
 
       this.disposables.push(
          this.treeView,
@@ -128,22 +127,30 @@ export class NoteExplorer {
 
    private registerCommands(): vscode.Disposable[] {
       return [
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.openFile`, (uri?: vscode.Uri) => this.openFile(uri)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.refresh`, () => this.refresh()),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.newFile`, (file?: File) => this.createNewFile(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.newFolder`, (file?: File) => this.createNewFolder(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.openInIntegratedTerminal`, (file?: File) => this.openInIntegratedTerminal(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.openInNewWindow`, (file?: File) => this.openInNewWindow(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.findInFolder`, (file?: File) => this.findInFolder(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.cut`, (file?: File) => this.cut(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.copy`, (file?: File) => this.copy(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.paste`, (file?: File) => this.paste(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.copyPath`, (file?: File) => this.copyPath(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.copyRelativePath`, (file?: File) => this.copyRelativePath(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.rename`, (file?: File) => this.rename(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.delete`, (file?: File) => this.delete(file)),
-         vscode.commands.registerCommand(`${extensionName}.noteExplorer.reveal`, (uri: vscode.Uri) => this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true })),
+         vscode.commands.registerCommand('daily-order.noteExplorer.openFile', (uri?: vscode.Uri) => this.openFile(uri)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.refresh', () => this.refresh()),
+         vscode.commands.registerCommand('daily-order.noteExplorer.newFile', (file?: File) => this.createNewFile(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.newFolder', (file?: File) => this.createNewFolder(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.openInIntegratedTerminal', (file?: File) => this.openInIntegratedTerminal(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.openInNewWindow', (file?: File) => this.openInNewWindow(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.findInFolder', (file?: File) => this.findInFolder(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.cut', (file?: File) => this.cut(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.copy', (file?: File) => this.copy(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.paste', (file?: File) => this.paste(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.copyPath', (file?: File) => this.copyPath(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.copyRelativePath', (file?: File) => this.copyRelativePath(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.rename', (file?: File) => this.rename(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.delete', (file?: File) => this.delete(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.reveal', async(uri: vscode.Uri) => this.revealFile(uri))
       ];
+   }
+   private async revealFile(uri?: vscode.Uri): Promise<void> {
+      if (!uri) return;
+
+      this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
+      const document = await vscode.workspace.openTextDocument(uri);
+      await vscode.window.showTextDocument(document);
+
    }
 
    private async showFileNameInputBox(dirname?: vscode.Uri, initialValue?: string): Promise<string | undefined> {
@@ -236,7 +243,7 @@ export class NoteExplorer {
    private openInNewWindow(file?: File): void {
       if (!this.config.notesDir) return;
       vscode.commands.executeCommand('vscode.openFolder', this.config.notesDir, { forceNewWindow: true });
-      // vscode.openFolder 没有参数打开新窗口并 reveal 指定的文件
+      //vscode.openFolder 没有参数打开新窗口并 reveal 指定的文件
    }
 
    private findInFolder(file?: File): void {
@@ -333,6 +340,7 @@ export class NoteExplorer {
 
       this.fileSystemProvider.rename(selectedFile.uri, vscode.Uri.file(input), { overwrite: false });
    }
+
 
    private async delete(file?: File): Promise<void> {
       if (!file && !this.treeView.selection.length) return;

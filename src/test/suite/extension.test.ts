@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 
-import { extensionPublisher, extensionName } from '../../constants';
+import { extensionPublisher } from '../../constants';
 
 const timeout = async (ms = 200) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -9,7 +9,7 @@ suite('Extension Test Suite', () => {
    let extension: vscode.Extension<any>;
 
    suiteSetup(() => {
-      extension = vscode.extensions.getExtension(`${extensionPublisher}.${extensionName}`) as vscode.Extension<any>;
+      extension = vscode.extensions.getExtension(`${extensionPublisher}.daily-order`) as vscode.Extension<any>;
    });
 
    test('Activation test', async () => {

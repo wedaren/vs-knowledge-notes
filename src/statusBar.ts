@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { Config } from './config';
-import { extensionName } from './constants';
 import { DisplayMode } from './types';
 
 export class StatusBar {
@@ -10,9 +9,9 @@ export class StatusBar {
    private readonly disposables: vscode.Disposable[] = [];
 
    constructor() {
-      this.viewModeSign = vscode.window.createStatusBarItem(`${extensionName}.statusBar.viewModeSign`, vscode.StatusBarAlignment.Left);
+      this.viewModeSign = vscode.window.createStatusBarItem('daily-order.statusBar.viewModeSign', vscode.StatusBarAlignment.Left);
       this.viewModeSign.text = this.config.displayMode === DisplayMode.Edit ? '$(pencil) (Edit Mode)' : '$(book) (View Mode)';
-      this.viewModeSign.command = `${extensionName}.toggleDisplayMode`;
+      this.viewModeSign.command = 'daily-order.toggleDisplayMode';
       this.viewModeSign.name = 'View Mode';
       this.viewModeSign.show();
 

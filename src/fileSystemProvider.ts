@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import trash from 'trash';
-import { extensionDisplayName, extensionName } from './constants';
+import { extensionDisplayName } from './constants';
 
 class Utils {
 
@@ -87,19 +87,19 @@ export class File extends vscode.TreeItem {
       this.tooltip = uri.fsPath;
       this.description = false;
       this.contextValue = File.toContextValue(type);
-      this.command = type === vscode.FileType.File ? { command: `${extensionName}.noteExplorer.openFile`, title: `${extensionDisplayName}: Open File`, arguments: [uri] } : undefined;
+      this.command = type === vscode.FileType.File ? { command: 'daily-order.noteExplorer.openFile', title: `${extensionDisplayName}: Open File`, arguments: [uri] } : undefined;
    }
 
    private static toContextValue(type: vscode.FileType): string {
       switch (type) {
          case vscode.FileType.File:
-            return `${extensionName}.File`;
+            return 'daily-order.File';
          case vscode.FileType.Directory:
-            return `${extensionName}.Directory`;
+            return 'daily-order.Directory';
          case vscode.FileType.SymbolicLink:
-            return `${extensionName}.SymbolicLink`;
+            return 'daily-order.SymbolicLink';
          case vscode.FileType.Unknown:
-            return `${extensionName}.Unknown`;
+            return 'daily-order.Unknown';
       }
    }
 
@@ -127,21 +127,21 @@ export class FileSystemProvider implements vscode.FileSystemProvider {
    delete(uri: vscode.Uri, options: { recursive: boolean }): Promise<void> {
       return new Promise<void>(async (resolve, reject) => {
          try {
-            // Use trash package to move to recycle bin/trash instead of permanent deletion
+            //Use trash package to move to recycle bin/trash instead of permanent deletion
             await trash(uri.fsPath, { glob: false });
             resolve();
          } catch (error) {
-            // Fall back to regular deletion if trash fails
+            //Fall back to regular deletion if trash fails
             fs.stat(uri.fsPath, (statError, stats) => {
                if (statError) {
                   return Utils.handleResult(resolve, reject, statError, undefined);
                }
-               
+
                if (stats.isDirectory()) {
-                  fs.rmdir(uri.fsPath, { recursive: options.recursive }, error => 
+                  fs.rmdir(uri.fsPath, { recursive: options.recursive }, error =>
                      Utils.handleResult(resolve, reject, error, undefined));
                } else {
-                  fs.unlink(uri.fsPath, error => 
+                  fs.unlink(uri.fsPath, error =>
                      Utils.handleResult(resolve, reject, error, undefined));
                }
             });

@@ -8,10 +8,12 @@ export class Config {
    readonly onDidChangeConfig: vscode.Event<Config.ConfigItems | undefined | void> = this._onDidChangeConfig.event;
 
    private static instance: Config = new Config();
-   private workspaceConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(extensionName);
+   private workspaceConfig!: vscode.WorkspaceConfiguration;
    private hasSetListener: boolean = false;
 
-   private constructor() { }
+   private constructor() {
+      this.loadWorkspaceConfig();
+   }
 
    static getInstance(): Config {
       return Config.instance;
@@ -22,7 +24,7 @@ export class Config {
       this.hasSetListener = true;
       return vscode.workspace.onDidChangeConfiguration(() => {
          this.loadWorkspaceConfig();
-         this._onDidChangeConfig.fire([Config.ConfigItem.NotesDir, Config.ConfigItem.ConfirmDelete, Config.ConfigItem.PreviewEngine, Config.ConfigItem.SinglePreview, Config.ConfigItem.ShowHiddenFiles, Config.ConfigItem.GitAutoSave, Config.ConfigItem.GitAutoSaveInterval, Config.ConfigItem.PromptsDir]);
+         this._onDidChangeConfig.fire(Config.AllConfigItems);
       });
    }
 
@@ -135,7 +137,7 @@ export class Config {
 
    set isNothingTag(isNothing: boolean) {
       this._isNothingTag = isNothing;
-      vscode.commands.executeCommand('setContext', `${extensionName}.isNothingTag`, isNothing);
+      vscode.commands.executeCommand('setContext', 'daily-order.isNothingTag', isNothing);
       this._onDidChangeConfig.fire([Config.ConfigItem.IsNothingTag]);
    }
 
@@ -145,7 +147,7 @@ export class Config {
 
    set isEmptyNotesDir(isEmpty: boolean) {
       this._isEmptyNotesDir = isEmpty;
-      vscode.commands.executeCommand('setContext', `${extensionName}.isEmptyNotesDir`, isEmpty);
+      vscode.commands.executeCommand('setContext', 'daily-order.isEmptyNotesDir', isEmpty);
       this._onDidChangeConfig.fire([Config.ConfigItem.IsEmptyNotesDir]);
    }
 
@@ -175,5 +177,6 @@ export namespace Config {
    export type ConfigItem = typeof ConfigItem[keyof typeof ConfigItem];
    export type ConfigItems = ConfigItem[];
    export type PreviewEngine = typeof PreviewEngine[keyof typeof PreviewEngine];
+   export const AllConfigItems = Object.values(ConfigItem) as ConfigItems;
 
 }

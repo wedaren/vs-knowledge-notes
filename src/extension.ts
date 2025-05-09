@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
       promptCompletionProvider,
       ']]'
    );
-   
+
    //注册命令以手动触发 prompt 补全
    const triggerPromptCompletionCommand = vscode.commands.registerCommand('daily-order.triggerPromptCompletion', () => {
       const editor = vscode.window.activeTextEditor;
@@ -37,29 +37,29 @@ export function activate(context: vscode.ExtensionContext) {
          vscode.commands.executeCommand('editor.action.triggerSuggest');
       }
    });
-   
+
    //注册调试相关命令
    const toggleDebugCommand = vscode.commands.registerCommand('daily-order.toggleDebugMode', async () => {
       const config = vscode.workspace.getConfiguration('daily-order');
       const currentValue = config.get('enableDebug', false);
-      
+
       //反转当前值
       await config.update('enableDebug', !currentValue, vscode.ConfigurationTarget.Global);
-      
+
       //更新 promptCompletionProvider 的调试状态
       promptCompletionProvider.toggleDebug(!currentValue);
-      
+
       //通知用户
       vscode.window.showInformationMessage(
          `调试模式已${!currentValue ? '启用' : '禁用'}`
       );
-      
+
       //如果启用了调试，自动显示输出面板
       if (!currentValue) {
          promptCompletionProvider.showDebugPanel();
       }
    });
-   
+
    const showDebugPanelCommand = vscode.commands.registerCommand('daily-order.showDebugPanel', () => {
       promptCompletionProvider.showDebugPanel();
    });

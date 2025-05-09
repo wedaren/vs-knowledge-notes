@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import escapeStringRegexp from 'escape-string-regexp';
 import { Config } from './config';
-import { extensionName } from './constants';
 import { ripGrep as rg, Options as rgOptions, RipGrepError, Match } from './ripgrep';
 
 class SearchResult implements vscode.QuickPickItem {
@@ -205,7 +204,7 @@ export class Search {
 
    private registerCommands(): vscode.Disposable[] {
       return [
-         vscode.commands.registerCommand(`${extensionName}.searchInNotes`, () => {
+         vscode.commands.registerCommand('daily-order.searchInNotes', () => {
             this.search();
          })
       ];

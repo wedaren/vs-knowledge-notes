@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as matter from 'gray-matter';
 import { ripGrep as rg, RipGrepError } from './ripgrep';
 import { Config } from './config';
-import { extensionName } from './constants';
 import { File, FileSystemProvider } from './fileSystemProvider';
 import { YAMLException } from 'js-yaml';
 
@@ -21,7 +20,7 @@ class Tag extends vscode.TreeItem {
 
       this.tooltip = label;
       this.description = false;
-      this.contextValue = `${extensionName}.Tag`;
+      this.contextValue = 'daily-order.Tag';
       this.iconPath = new vscode.ThemeIcon('tag');
       this.addFileUris(...fileUris);
       this.addChildren(...children);
@@ -154,7 +153,7 @@ export class TagExplorer {
 
    constructor(private readonly fileSystemProvider: FileSystemProvider) {
       this.treeDataProvider = new TreeDataProvider();
-      this.treeView = vscode.window.createTreeView(`${extensionName}.tagExplorer`, { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
+      this.treeView = vscode.window.createTreeView('daily-order.tagExplorer', { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
 
       this.disposables.push(
          this.treeView,
@@ -179,7 +178,7 @@ export class TagExplorer {
 
    private registerCommands(): vscode.Disposable[] {
       return [
-         vscode.commands.registerCommand(`${extensionName}.tagExplorer.refresh`, () => this.refresh())
+         vscode.commands.registerCommand('daily-order.tagExplorer.refresh', () => this.refresh())
       ];
    }
 
