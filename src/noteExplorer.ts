@@ -133,13 +133,16 @@ export class NoteExplorer {
          await this.fileSystemProvider.createDirectory(folderUri);
       }
 
-      const noteFileName = dayjs().format('YYYY-MM-DD') + '.md';
+      const today = dayjs();
+      const noteFileName = today.format('YYYY-MM-DD') + '.md';
       const noteFileUri = vscode.Uri.joinPath(folderUri, noteFileName);
       if (! this.fileSystemProvider.exists(noteFileUri)) {
-         await this.fileSystemProvider.writeFile(noteFileUri, new Uint8Array(), { create: true, overwrite: false });
+         const template = `# ${today.format('YYYY-MM-DD')}\n\n`;
+         await this.fileSystemProvider.writeFile(noteFileUri, Buffer.from(template), { create: true, overwrite: false });
       }
       await this.revealFile(noteFileUri);
    }
+
 
    dispose(): void {
       this.disposables.forEach(d => d.dispose());
