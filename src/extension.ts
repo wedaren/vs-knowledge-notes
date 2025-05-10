@@ -20,7 +20,6 @@ export function activate(context: vscode.ExtensionContext) {
    const watcher = Watcher.getInstance();
    watcher.watch(fileSystemProvider);
    const gitAutoSaveManager = GitAutoSaveManager.getInstance();
-   const autoSaveManager = AutoSaveManager.getInstance();
    //注册 prompt 补全功能
    const promptCompletionProvider = new PromptCompletionProvider();
    const promptProvider = vscode.languages.registerCompletionItemProvider(
@@ -136,7 +135,7 @@ export function activate(context: vscode.ExtensionContext) {
       new TagExplorer(fileSystemProvider),
       new Search(),
       gitAutoSaveManager,
-      autoSaveManager,
+      AutoSaveManager.getInstance(),
       completionProvider,
       timestampProvider,
       promptProvider,

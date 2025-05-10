@@ -7,7 +7,6 @@ export class GitAutoSaveManager {
     private config: Config = Config.getInstance();
     private gitService: GitService = GitService.getInstance();
     private autoSaveTimer: NodeJS.Timer | undefined;
-    private fileWatcher: vscode.FileSystemWatcher | undefined;
     private disposables: vscode.Disposable[] = [];
 
     private constructor() {
@@ -44,18 +43,10 @@ export class GitAutoSaveManager {
           this.autoSaveTimer = undefined;
        }
 
-       if (this.fileWatcher) {
-          this.fileWatcher.dispose();
-          this.fileWatcher = undefined;
-       }
-
        //检查配置是否启用自动保存
        if (!this.config.gitAutoSave || !this.config.notesDir) {
           return;
        }
-
-       //设置文件变更监听
-       this.setupFileWatcher();
 
        //设置定时器，定期提交
        const intervalMinutes = this.config.gitAutoSaveInterval;
@@ -65,38 +56,6 @@ export class GitAutoSaveManager {
              this.saveToGit('定时自动保存');
           }, intervalMs);
        }
-    }
-
-    /**
-     * 设置文件变更监听
-     */
-    private setupFileWatcher(): void {
-       if (!this.config.notesDir) return;
-
-       //创建文件系统监听器，监听笔记目录中的所有文件变更
-       this.fileWatcher = vscode.workspace.createFileSystemWatcher(
-          new vscode.RelativePattern(this.config.notesDir, '**/*')
-       );
-
-       //设置文件变更的延迟保存
-       let saveTimeout: NodeJS.Timeout | undefined;
-       const handleFileChange = () => {
-          //清除现有的定时器
-          if (saveTimeout) {
-             clearTimeout(saveTimeout);
-          }
-
-          //创建一个新的定时器，1分钟后执行自动保存
-          saveTimeout = setTimeout(() => {
-             this.saveToGit('文件变更自动保存');
-             saveTimeout = undefined;
-          }, 1 * 60 * 1000); //1分钟延迟
-       };
-
-       //监听文件的创建、修改和删除事件
-       this.fileWatcher.onDidCreate(handleFileChange);
-       this.fileWatcher.onDidChange(handleFileChange);
-       this.fileWatcher.onDidDelete(handleFileChange);
     }
 
     /**
@@ -123,10 +82,6 @@ export class GitAutoSaveManager {
     dispose(): void {
        if (this.autoSaveTimer) {
           clearInterval(this.autoSaveTimer);
-       }
-
-       if (this.fileWatcher) {
-          this.fileWatcher.dispose();
        }
 
        this.disposables.forEach(d => d.dispose());

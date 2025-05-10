@@ -71,8 +71,32 @@ export class GitService {
 
              await this.executeCommand(`git commit -m "${commitMsg}"`, directoryPath);
 
+             try {
+                await this.executeCommand('git pull --rebase', directoryPath);
+             } catch (rebaseError: any) {
+                if (rebaseError.message && rebaseError.message.includes('CONFLICT')) {
+                   vscode.window.showErrorMessage('拉取远程更改时发生合并冲突。请手动解决冲突后，执行 "git rebase --continue"，然后重试。或者执行 "git rebase --abort" 中止变基。');
+                } else if (rebaseError.stderr && rebaseError.stderr.includes('could not lock config file')) {
+                   vscode.window.showErrorMessage('无法锁定配置文件，请检查是否有其他进程正在使用该文件。');
+                }
+                else {
+                   vscode.window.showErrorMessage(`从远程仓库拉取更改失败: ${rebaseError.message}`);
+                }
+                return; //阻止后续的 push 操作
+             }
+
              progress.report({ message: '推送到远程仓库...' });
-             await this.executeCommand('git push', directoryPath);
+             try {
+                await this.executeCommand('git push', directoryPath);
+             } catch (pushError: any) {
+                if (pushError.stderr && pushError.stderr.includes('could not read Username')) {
+                   vscode.window.showErrorMessage('推送失败：无法读取用户名，请检查您的 Git 配置。');
+                }
+                else {
+                   vscode.window.showErrorMessage(`推送到远程仓库失败: ${pushError.message}`);
+                }
+                return; //阻止显示成功消息
+             }
 
              this._onDidCommit.fire();
              vscode.window.showInformationMessage('已成功保存到 Git 仓库');
