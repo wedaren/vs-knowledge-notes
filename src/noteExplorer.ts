@@ -174,8 +174,7 @@ export class NoteExplorer {
       if (!uri) return;
 
       await this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
-      const document = await vscode.workspace.openTextDocument(uri);
-      await vscode.window.showTextDocument(document);
+      this.openFile(uri);
    }
 
    private async showFileNameInputBox(dirname?: vscode.Uri, initialValue?: string): Promise<string | undefined> {
