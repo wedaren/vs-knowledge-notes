@@ -14,6 +14,7 @@ import { MarkdownLinkHandler } from './markdownLinkHandler';
 import { AutoSaveManager } from './autoSaveManager';
 import { TimestampAssistant } from './assistants/timestampAssistant';
 import { PromptCompletionProvider } from './promptCompletionProvider';
+import { ChatViewProvider } from './chatViewProvider';
 
 export function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
@@ -126,6 +127,24 @@ export function activate(context: vscode.ExtensionContext) {
    //注册 Markdown 链接处理器
    const markdownLinkHandler = new MarkdownLinkHandler();
    const noteExplorer = new NoteExplorer(fileSystemProvider);
+
+   const chatViewProvider = new ChatViewProvider(context.extensionUri);
+   context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+         'daily-order.chatView',
+         chatViewProvider
+      )
+   );
+
+   //Listen for active text editor changes
+   vscode.window.onDidChangeActiveTextEditor(async editor => {
+      await chatViewProvider.handleEditorChange(editor);
+   });
+
+   //Handle the initially active editor
+   if (vscode.window.activeTextEditor) {
+      chatViewProvider.handleEditorChange(vscode.window.activeTextEditor);
+   }
 
    context.subscriptions.push(
       watcher,

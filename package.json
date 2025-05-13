@@ -4,7 +4,7 @@
    "description": "VSCode extension for managing your daily order.",
    "version": "1.1.19",
    "engines": {
-      "vscode": "^1.57.0"
+      "vscode": "^1.97.0"
    },
    "categories": [
       "Other"
@@ -240,6 +240,15 @@
                "icon": "$(tag)",
                "contextualTitle": "Tag Explorer"
             }
+         ],
+         "dailyorderpanel": [
+            {
+               "id": "daily-order.chatView",
+               "name": "LLM Chat",
+               "type": "webview",
+               "icon": "$(comment-discussion)",
+               "contextualTitle": "LLM Chat"
+            }
          ]
       },
       "viewsContainers": {
@@ -247,6 +256,13 @@
             {
                "id": "DailyOrder",
                "title": "Daily Order",
+               "icon": "$(output-view-icon)"
+            }
+         ],
+         "panel": [
+            {
+               "id": "dailyorderpanel",
+               "title": "Daily Order Panel",
                "icon": "$(output-view-icon)"
             }
          ]
@@ -498,7 +514,7 @@
       "@types/js-yaml": "^4.0.1",
       "@types/mocha": "^8.0.4",
       "@types/node": "^12.11.7",
-      "@types/vscode": "^1.57.0",
+      "@types/vscode": "^1.97.0",
       "@typescript-eslint/eslint-plugin": "^4.14.1",
       "@typescript-eslint/parser": "^4.14.1",
       "copy-webpack-plugin": "^9.1.0",

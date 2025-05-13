@@ -1,0 +1,133 @@
+/* media/chat.css */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.chat-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-bottom: 10px; /* Space for the input container */
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message {
+  padding: 8px 12px;
+  border-radius: 6px;
+  max-width: 85%;
+  word-wrap: break-word;
+}
+
+.user-message {
+  background-color: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+  align-self: flex-end;
+  margin-left: auto; /* Push to the right */
+}
+
+.assistant-message {
+  background-color: var(--vscode-editorWidget-background);
+  color: var(--vscode-editorWidget-foreground);
+  align-self: flex-start;
+  margin-right: auto; /* Push to the left */
+}
+
+.message pre {
+  margin: 0;
+  font-family: inherit; /* Inherit font from body/vscode vars */
+  font-size: inherit;
+}
+
+.chat-input-container {
+  display: flex; /* Keep this for overall bottom bar structure */
+  flex-direction: column; /* Stack model selector and input controls vertically */
+  padding-top: 10px;
+  border-top: 1px solid var(--vscode-editorWidget-border, var(--vscode-contrastBorder));
+  background-color: var(--vscode-editor-background); /* Match editor background */
+}
+
+/* NEW: Styles for the overall input area that includes model selection and text input */
+.chat-input-area {
+  display: flex;
+  flex-direction: column; /* Stack model selector and input controls vertically */
+  gap: 8px; /* Space between model selector and text input row */
+  padding: 8px; /* Add some padding around the input area */
+  border-top: 1px solid var(--vscode-editorWidget-border, var(--vscode-contrastBorder));
+  background-color: var(--vscode-editor-background);
+}
+
+/* NEW: Styles for the container of the model label and select dropdown */
+.model-selector-container {
+  display: flex;
+  align-items: center; /* Vertically align label and select */
+  gap: 8px; /* Space between label and select */
+}
+
+.model-selector-container label {
+  white-space: nowrap; /* Prevent label from wrapping */
+}
+
+#model-selector {
+  /* Let it take up a reasonable amount of space, but not too much */
+  flex-grow: 0;
+  width: 100px;
+  border: transparent;
+  box-sizing: border-box;
+  outline: none;
+  /* Standard VS Code select styling will apply if not overridden by vscode.css */
+}
+
+/* NEW: Styles for the container of the textarea and send button */
+.chat-input-controls {
+  display: flex;
+  align-items: flex-end; /* Align items to the bottom, useful if textarea resizes */
+  gap: 8px; /* Space between textarea and button */
+}
+
+.chat-input {
+  flex-grow: 1;
+  resize: none; /* Prevent manual resizing */
+  min-height: 20px; /* Min height for one line */
+  max-height: 100px; /* Max height before scrolling */
+  overflow-y: auto; /* Allow scrolling if content exceeds max-height */
+  /* margin-right: 8px; Removed, using gap on parent now */
+  padding: 6px 8px;
+  box-sizing: border-box;
+}
+
+.send-button {
+  height: 28px; /* Match textarea typical one-line height with padding */
+  width: 100px; /* Fixed width for send button */
+  align-self: flex-end; /* Align with bottom of textarea if it grows */
+}
+
+/* Scrollbar styling for webkit browsers */
+.chat-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: transparent; /* Or var(--vscode-editor-background) */
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background-color: var(--vscode-scrollbarSlider-background);
+  border-radius: 4px;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.chat-container::-webkit-scrollbar-thumb:active {
+  background-color: var(--vscode-scrollbarSlider-activeBackground);
+}
