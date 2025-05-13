@@ -1,4 +1,8 @@
 # Change Log
+## [1.1.20] - 2025-05-13
+
+- feature: 在 panel 添加 LLM chat 辅助笔记编辑
+
 ## [1.1.19] - 2025-05-12
 
 - 添加 Git 操作的错误处理，增强用户提示信息
@@ -31,8 +35,8 @@
 
 ## [1.1.14] - 2025-05-05
 
-- chore: update GitHub Actions to use latest versions of actions and Node.js%0A- feat: implement GitHub Actions workflow for automated VS Code extension release
-
+- chore: update GitHub Actions to use latest versions of actions and Node.js
+- feat: implement GitHub Actions workflow for automated VS Code extension release
 
 ## [1.1.13] - 2025-05-05
 
@@ -49,7 +53,7 @@
 ## [1.1.11] - 2025-05-05
 
 - 版本更新
-- 性能优化 
+- 性能优化
 - 稳定性提升
 - 优化发布流程
 
@@ -87,29 +91,29 @@
 
 ## [1.1.4] - 2025-04-25
 
- - Add 'Focus On Today Order Note' command
+- Add 'Focus On Today Order Note' command
 
 ## [1.1.3] - 2025-04-27
 
- - Update version compatibility
- - Performance improvements
- - Bug fixes for file operations
- - Add configuration option to show hidden files in note explorer
+- Update version compatibility
+- Performance improvements
+- Bug fixes for file operations
+- Add configuration option to show hidden files in note explorer
 
 ## [1.1.2]
 
- - Update docs
- - Add "Open In Integrated Terminal" command
- - Fix bug that user can input space on filename or dirname
+- Update docs
+- Add "Open In Integrated Terminal" command
+- Fix bug that user can input space on filename or dirname
 
 ## [1.1.1]
 
- - Update docs
- - Fix icon transparent
+- Update docs
+- Fix icon transparent
 
 ## [1.0.1]
 
- - Change Extension Icon
+- Change Extension Icon
 
 ## [1.0.0]
 
