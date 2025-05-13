@@ -14,6 +14,7 @@ import { MarkdownLinkHandler } from './markdownLinkHandler';
 import { AutoSaveManager } from './autoSaveManager';
 import { TimestampAssistant } from './assistants/timestampAssistant';
 import { PromptCompletionProvider } from './promptCompletionProvider';
+import { ChatViewProvider } from './chatViewProvider';
 
 export function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
@@ -126,6 +127,62 @@ export function activate(context: vscode.ExtensionContext) {
    //注册 Markdown 链接处理器
    const markdownLinkHandler = new MarkdownLinkHandler();
    const noteExplorer = new NoteExplorer(fileSystemProvider);
+
+   const chatViewProvider = new ChatViewProvider(context.extensionUri);
+   context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+         'daily-order.chatView',
+         chatViewProvider
+      )
+   );
+
+   //Function to handle editor logic
+   async function handleEditor(editor: vscode.TextEditor | undefined) {
+      if (editor && editor.document.languageId === 'markdown' && editor.document.uri.scheme === 'file') {
+         const filePath = editor.document.fileName;
+
+         //Ignore chatlog.md and prompt.md files
+         if (filePath.endsWith('.chatlog.md') || filePath.endsWith('.prompt.md')) {
+            return;
+         }
+
+         //Handle prompt file
+         const promptFilePath = filePath.replace(/\.md$/, '.prompt.md');
+         try {
+            const promptFileUri = vscode.Uri.file(promptFilePath);
+            const promptContent = await vscode.workspace.fs.readFile(promptFileUri);
+            chatViewProvider.setPromptText(Buffer.from(promptContent).toString('utf-8'));
+         } catch {
+            chatViewProvider.setPromptText(''); //Clear prompt if no prompt file
+         }
+
+         //Handle chatlog file
+         const chatlogFilePath = filePath.replace(/\.md$/, '.chatlog.md');
+         const chatlogFileUri = vscode.Uri.file(chatlogFilePath);
+         chatViewProvider.setActiveChatlogUri(chatlogFileUri); //Set active chatlog for saving
+
+         try {
+            const chatlogContent = await vscode.workspace.fs.readFile(chatlogFileUri);
+            chatViewProvider.updateChatHistory(Buffer.from(chatlogContent).toString('utf-8'));
+         } catch {
+            chatViewProvider.updateChatHistory(''); //Clear history if no chatlog file
+         }
+      } else {
+         chatViewProvider.setPromptText('');
+         chatViewProvider.updateChatHistory('');
+         chatViewProvider.setActiveChatlogUri(undefined); //Reset active chatlog URI
+      }
+   }
+
+   //Listen for active text editor changes
+   vscode.window.onDidChangeActiveTextEditor(async editor => {
+      await handleEditor(editor);
+   });
+
+   //Handle the initially active editor
+   if (vscode.window.activeTextEditor) {
+      handleEditor(vscode.window.activeTextEditor);
+   }
 
    context.subscriptions.push(
       watcher,
