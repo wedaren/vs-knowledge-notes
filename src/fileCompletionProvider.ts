@@ -19,7 +19,16 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
              this.fileCache.clear();
           }
        });
-       console.log('FileCompletionProvider 已初始化');
+    }
+
+    public static register(): vscode.Disposable {
+       const provider = new FileCompletionProvider();
+       return vscode.languages.registerCompletionItemProvider(
+          { scheme: 'file', language: 'markdown' },
+          provider,
+          '>', //触发字符
+          '》' //新增触发字符
+       );
     }
 
     async provideCompletionItems(
@@ -59,9 +68,12 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
           //使用find命令过滤文件
           console.log(`开始使用find命令搜索关键字: "${keyword}"`);
           const files = await this.filterFilesWithFind(notesDir.fsPath, keyword);
-          files.unshift(path.join(notesDir.fsPath, `${keyword}.md`));
-          //创建补全项
-          const completionItems = files.map((file,index) => {
+          if(files.length === 0){
+             vscode.commands.executeCommand('editor.action.triggerSuggest');
+          }
+          //创建文件占位
+          const file = path.join(notesDir.fsPath, `${keyword}.md`);
+          const completionItems = [...(keyword?[file]:[]),...files].map((file,index) => {
 
              const relativePath = path.relative(notesDir.fsPath, file);
              const fileName = path.basename(file, '.md');
@@ -93,17 +105,19 @@ export class FileCompletionProvider implements vscode.CompletionItemProvider {
              console.log(`替换范围: ${startPosition.line}:${startPosition.character} -> ${endPosition.line}:${endPosition.character}`);
              console.log(`插入文本: ${markdownLink}`);
 
-             if(index === 0) {
-                const filePath = path.resolve(notesDir.fsPath, `${keyword}.md`);
-                completionItem.detail = '创建文件';
+             //目录
+             if(keyword){
+                if(index === 0) {
+                   const filePath = path.resolve(notesDir.fsPath, `${keyword}.md`);
+                   completionItem.detail = '创建文件';
+                   const folderUri = vscode.Uri.file(filePath);
 
-                completionItem.command = {
-                   title: '创建文件',
-                   command: 'vs-knowledge-notes.checkAndCreateFile',
-                   arguments: [filePath]
-                };
-
-
+                   completionItem.command = {
+                      title: '创建文件',
+                      command: 'daily-order.noteExplorer.createFile',
+                      arguments: [folderUri]
+                   };
+                }
              }
              return completionItem;
           });

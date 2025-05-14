@@ -155,7 +155,11 @@ export class NoteExplorer {
          vscode.commands.registerCommand('daily-order.noteExplorer.openFile', (uri?: vscode.Uri) => this.openFile(uri)),
          vscode.commands.registerCommand('daily-order.noteExplorer.refresh', () => this.refresh()),
          vscode.commands.registerCommand('daily-order.noteExplorer.newFile', (file?: File) => this.createNewFile(file)),
+         //TODO:这个命令应该属于 FileSystemProvider
+         vscode.commands.registerCommand('daily-order.noteExplorer.createFile', (uri?: vscode.Uri) => this.createNewFileByName(uri)),
          vscode.commands.registerCommand('daily-order.noteExplorer.newFolder', (file?: File) => this.createNewFolder(file)),
+         //TODO:这个命令应该属于 FileSystemProvider
+         vscode.commands.registerCommand('daily-order.noteExplorer.createFolder', (uri?: vscode.Uri) => this.createNewFolderByName(uri)),
          vscode.commands.registerCommand('daily-order.noteExplorer.openInIntegratedTerminal', (file?: File) => this.openInIntegratedTerminal(file)),
          vscode.commands.registerCommand('daily-order.noteExplorer.openInNewWindow', (file?: File) => this.openInNewWindow(file)),
          vscode.commands.registerCommand('daily-order.noteExplorer.findInFolder', (file?: File) => this.findInFolder(file)),
@@ -170,7 +174,7 @@ export class NoteExplorer {
          vscode.commands.registerCommand('daily-order.noteExplorer.focusOnTodayOrderNote', () => this.focusOnTodayOrderNote()),
       ];
    }
-   private async revealFile(uri?: vscode.Uri): Promise<void> {
+   async revealFile(uri?: vscode.Uri): Promise<void> {
       if (!uri) return;
 
       await this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
@@ -253,6 +257,35 @@ export class NoteExplorer {
       const filename = vscode.Uri.file(input);
 
       this.fileSystemProvider.createDirectory(filename);
+   }
+   private async createNewFolderByName(dirUri?: vscode.Uri): Promise<void> {
+      if (!this.config.notesDir) return;
+      if(!dirUri) return;
+      this.fileSystemProvider.createDirectory(dirUri);
+   }
+   private async createNewFileByName(file?: vscode.Uri): Promise<void> {
+      if (!this.config.notesDir) return;
+      if(!file) return;
+
+      //检查文件是否存在
+      if (! this.fileSystemProvider.exists(file)) {
+         //创建文件
+         try {
+            const dirUri = vscode.Uri.file(path.dirname(file.fsPath));
+            if (! this.fileSystemProvider.exists(dirUri)) {
+               await this.fileSystemProvider.createDirectory(dirUri);
+            }
+            const fileName = path.basename(file.fsPath, '.md');
+            const content = `# ${fileName}\n\n`;
+            await this.fileSystemProvider.writeFile(file, Buffer.from(content, 'utf8'), { create: true, overwrite: false });
+         } catch (error) {
+            console.error(`创建文件失败: ${file.fsPath}`, error);
+            vscode.window.showErrorMessage(`创建文件失败: ${file.fsPath}`);
+         }
+      } else {
+         //如果文件已存在，则直接打开
+         this.revealFile(file);
+      }
    }
 
    private openInIntegratedTerminal(file?: File): void {
