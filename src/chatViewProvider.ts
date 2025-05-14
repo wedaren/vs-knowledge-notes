@@ -176,6 +176,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
    }
 
    public async setReadlyPanel(editor: vscode.TextEditor): Promise<void> {
+      vscode.commands.executeCommand('daily-order.chatView.focus');
       const filePath = editor.document.fileName;
       const fileUri = editor.document.uri;
 
