@@ -1,4 +1,9 @@
 # Change Log
+## [1.1.21] - 2025-05-14
+
+- 移除不必要的命令注册，优化文件补全提供者和笔记浏览器功能
+- 更新 shouldAutoSave 方法以支持 prompt.md 文件类型
+
 ## [1.1.20] - 2025-05-13
 
 - feature: 在 panel 添加 LLM chat 辅助笔记编辑
