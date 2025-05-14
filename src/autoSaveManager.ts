@@ -36,7 +36,8 @@ export class AutoSaveManager {
 
     private shouldAutoSave(document: vscode.TextDocument): boolean {
        //检查是否是 markdown 文件
-       if (document.languageId !== 'markdown') {
+       //⚠️ prompt.md  在 vscode 中是 prompt
+       if (!['markdown','prompt'].includes(document.languageId)) {
           return false;
        }
 
