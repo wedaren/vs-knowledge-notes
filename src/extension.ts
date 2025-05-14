@@ -15,8 +15,9 @@ import { AutoSaveManager } from './autoSaveManager';
 import { TimestampAssistant } from './assistants/timestampAssistant';
 import { PromptCompletionProvider } from './promptCompletionProvider';
 import { ChatViewProvider } from './chatViewProvider';
+import { SearchInputViewProvider } from './searchInputViewProvider';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
    const watcher = Watcher.getInstance();
    watcher.watch(fileSystemProvider);
@@ -28,7 +29,6 @@ export function activate(context: vscode.ExtensionContext) {
       promptCompletionProvider,
       ']]'
    );
-
 
    //注册调试相关命令
    const toggleDebugCommand = vscode.commands.registerCommand('daily-order.toggleDebugMode', async () => {
@@ -63,7 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
       timestampAssistant,
    );
 
-
    //注册 Markdown 链接处理器
    const markdownLinkHandler = new MarkdownLinkHandler();
    const noteExplorer = new NoteExplorer(fileSystemProvider);
@@ -73,6 +72,19 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.registerWebviewViewProvider(
          'daily-order.chatView',
          chatViewProvider
+      )
+   );
+
+   const searchInstance = new Search(context.extensionUri);
+   context.subscriptions.push(searchInstance);
+
+   const searchInputProvider = new SearchInputViewProvider(context.extensionUri, searchInstance);
+   searchInstance.setSearchInputViewProvider(searchInputProvider);
+
+   context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+         SearchInputViewProvider.viewType,
+         searchInputProvider
       )
    );
 
@@ -124,7 +136,7 @@ export function activate(context: vscode.ExtensionContext) {
       noteExplorer,
       new StatusBar(),
       new TagExplorer(fileSystemProvider),
-      new Search(),
+      searchInstance,
       gitAutoSaveManager,
       AutoSaveManager.getInstance(),
       FileCompletionProvider.register(),

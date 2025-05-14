@@ -124,6 +124,21 @@
             "title": "Search In Notes"
          },
          {
+            "command": "daily-order.search.toggleMatchCase",
+            "category": "Daily Order Search",
+            "title": "Toggle Match Case"
+         },
+         {
+            "command": "daily-order.search.toggleWholeWord",
+            "category": "Daily Order Search",
+            "title": "Toggle Whole Word"
+         },
+         {
+            "command": "daily-order.search.toggleUseRegex",
+            "category": "Daily Order Search",
+            "title": "Toggle Use Regular Expression"
+         },
+         {
             "command": "daily-order.toggleGitAutoSave",
             "category": "Daily Order",
             "title": "Toggle Git Auto Save"
@@ -152,6 +167,15 @@
          {
             "command": "vs-knowledge-notes.openMarkdownLink",
             "title": "Open Markdown Link"
+         },
+         {
+            "command": "daily-order.openSearchResult",
+            "title": "Open Search Result"
+         },
+         {
+            "command": "daily-order.clearSearch",
+            "title": "Clear Search",
+            "category": "Daily Order Search"
          }
       ],
       "keybindings": [
@@ -216,6 +240,13 @@
       "views": {
          "DailyOrder": [
             {
+               "id": "daily-order.searchInputView",
+               "name": "Search Input",
+               "type": "webview",
+               "icon": "$(search)",
+               "when": "config.daily-order.notesDir"
+            },
+            {
                "id": "daily-order.noteExplorer",
                "name": "Note Explorer",
                "icon": "$(files)",
@@ -226,6 +257,13 @@
                "name": "Tag Explorer",
                "icon": "$(tag)",
                "contextualTitle": "Tag Explorer"
+            },
+            {
+               "id": "daily-order.searchView",
+               "name": "Search Results",
+               "icon": "$(search-results)",
+               "contextualTitle": "Search Results",
+               "when": "config.daily-order.notesDir"
             }
          ],
          "dailyorderpanel": [
@@ -280,6 +318,16 @@
             "view": "daily-order.tagExplorer",
             "contents": "Tag is nothing.",
             "when": "!config.daily-order.notesDir || daily-order.isNothingTag"
+         },
+         {
+            "view": "daily-order.searchView",
+            "contents": "Use the input field above to search your notes.",
+            "when": "config.daily-order.notesDir && !dailyOrderSearch.hasResults && !dailyOrderSearch.noResults"
+         },
+         {
+            "view": "daily-order.searchView",
+            "contents": "No results found. Try a different search term or adjust search options.",
+            "when": "config.daily-order.notesDir && dailyOrderSearch.noResults"
          }
       ],
       "menus": {
@@ -313,6 +361,15 @@
                "command": "daily-order.tagExplorer.refresh",
                "when": "view == daily-order.tagExplorer",
                "group": "navigation"
+            },
+            {
+               "command": "daily-order.clearSearch",
+               "when": "view == daily-order.searchView && dailyOrderSearch.hasResults",
+               "group": "navigation@4",
+               "icon": {
+                  "light": "$(clear-all)",
+                  "dark": "$(clear-all)"
+               }
             }
          ],
          "view/item/context": [
@@ -385,6 +442,10 @@
          "commandPalette": [
             {
                "command": "daily-order.noteExplorer.findInFolder",
+               "when": "false"
+            },
+            {
+               "command": "daily-order.openSearchResult",
                "when": "false"
             },
             {

@@ -1,0 +1,115 @@
+/* media/searchInput.css */
+body, html {
+    margin: 0;
+    padding: 8px; /* Added some padding */
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--vscode-font-family);
+    background-color: var(--vscode-sideBar-background); /* Use sidebar background */
+    color: var(--vscode-editor-foreground); /* Use editor foreground for text */
+}
+
+.input-container {
+    display: flex;
+    margin-bottom: 8px; /* Increased margin */
+}
+
+input[type="text"] {
+    flex-grow: 1;
+    padding: 6px; /* Increased padding */
+    border: 1px solid var(--vscode-input-border, var(--vscode-contrastBorder, transparent));
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border-radius: 3px; /* Slightly more rounded */
+    font-size: var(--vscode-font-size);
+}
+
+input[type="text"]:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    border-color: var(--vscode-focusBorder);
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-start;
+}
+
+button {
+    padding: 6px 10px; /* Increased padding */
+    border: 1px solid var(--vscode-button-border, var(--vscode-button-background));
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    cursor: pointer;
+    border-radius: 3px; /* Slightly more rounded */
+    font-size: var(--vscode-font-size);
+    text-align: center;
+}
+
+button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+#searchButton {
+    margin-right: 8px; /* Increased margin */
+}
+
+/* Ensure no default browser outline on focused buttons, as VS Code handles focus styling */
+#searchButton:focus, #clearButton:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+}
+
+.action-buttons-container {
+    display: flex;
+}
+/* Styles for toggle buttons */
+#matchCaseButton,
+#wholeWordButton,
+#useRegexButton {
+    background-color: var(--vscode-input-background); /* Using input background as a base for toggle buttons */
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-border, var(--vscode-contrastBorder, transparent));
+    padding: 4px; /* Adjust padding for icon buttons */
+    cursor: pointer;
+    border-radius: 2px;
+    margin-right: 8px; /* Space from previous button or element */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; /* Fixed width for a square-like button */
+    height: 28px; /* Fixed height, matching typical icon button sizes */
+    box-sizing: border-box;
+}
+
+#matchCaseButton:hover,
+#wholeWordButton:hover,
+#useRegexButton:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+#matchCaseButton img,
+#wholeWordButton img,
+#useRegexButton img {
+    width: 16px; /* Standard icon size */
+    height: 16px;
+    /* For SVGs, you might want to control fill color if they are designed to use currentColor */
+    /* filter: brightness(0) invert(1); /* Example for making a dark icon white, adjust as needed */
+}
+
+/* Active state for toggle buttons */
+#matchCaseButton.active,
+#wholeWordButton.active,
+#useRegexButton.active {
+    background-color: var(--vscode-button-background); /* A more prominent background for active state */
+    border-color: var(--vscode-focusBorder); /* Use focus border color to indicate active state */
+    color: var(--vscode-button-foreground); /* Ensure icon color contrasts with active background if needed */
+}
+
+/* Focus state for toggle buttons - consistent with other buttons */
+#matchCaseButton:focus,
+#wholeWordButton:focus,
+#useRegexButton:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    border-color: var(--vscode-focusBorder); /* Optional: also change border color on focus */
+}

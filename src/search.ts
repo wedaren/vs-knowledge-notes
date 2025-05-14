@@ -1,89 +1,34 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import escapeStringRegexp from 'escape-string-regexp';
 import { Config } from './config';
 import { ripGrep as rg, Options as rgOptions, RipGrepError, Match } from './ripgrep';
+import { SearchResultsProvider, SearchResultItem } from './searchViewProvider';
+import { SearchInputViewProvider } from './searchInputViewProvider';
 
-class SearchResult implements vscode.QuickPickItem {
+export const MatchCaseId = 0 as const;
+export const MatchWholeWordId = 1 as const;
+export const UseRegularExpressionId = 2 as const;
 
-   alwaysShow = true;
-   label: string;
-   description?: string;
-   detail?: string;
-   uri?: vscode.Uri;
-   lineNumber?: number;
+export type SearchOptionId = typeof MatchCaseId | typeof MatchWholeWordId | typeof UseRegularExpressionId;
 
-   constructor(label: string);
-   constructor(uri: vscode.Uri, matchedLineText: string, lineNumber: number);
-   constructor(uriOrLabel: vscode.Uri | string, matchedLineText?: string, lineNumber?: number) {
-      if (typeof uriOrLabel === 'string') {
-         this.label = uriOrLabel;
-         return;
-      }
-      this.uri = uriOrLabel;
-      this.label = path.basename(this.uri.fsPath);
-      this.description = this.uri.fsPath;
-      this.detail = matchedLineText;
-      this.lineNumber = lineNumber;
-   }
+const SearchOptionKeysById: { [key in SearchOptionId]: string } = {
+   [MatchCaseId]: 'matchCase',
+   [MatchWholeWordId]: 'wholeWord',
+   [UseRegularExpressionId]: 'useRegex'
+};
 
-}
-
-const [MatchCaseId, MatchWholeWordId, UseRegularExpressionId] = [0, 1, 2] as const;
-const SearchOptions = {
-   MatchCase: { id: MatchCaseId, tooltip: 'Match Case', icon: 'case-sensitive.svg' },
-   MatchWholeWord: { id: MatchWholeWordId, tooltip: 'Match Whole Word', icon: 'whole-word.svg' },
-   UseRegularExpression: { id: UseRegularExpressionId, tooltip: 'Use Regular Expression', icon: 'regex.svg' }
-} as const;
-type SearchOptions = typeof SearchOptions[keyof typeof SearchOptions];
-type SearchOptionId = typeof SearchOptions[keyof typeof SearchOptions]['id'];
-type UseSearchOptions = { [key in SearchOptionId]: boolean };
-
-class OptionButton implements vscode.QuickInputButton {
-
-   private _enabled: boolean = false;
-   iconPath: { light: vscode.Uri, dark: vscode.Uri };
-   tooltip: string;
-
-   constructor(option: SearchOptions);
-   constructor(option: SearchOptions, enabled: boolean);
-   constructor(public option: SearchOptions, enabled?: boolean) {
-      this.tooltip = option.tooltip;
-      if (typeof enabled !== 'undefined') this._enabled = enabled;
-      this.iconPath = {
-         dark: vscode.Uri.file(path.join(__dirname, '..', 'resources', this._enabled ? 'dark' : 'light', this.option.icon)),
-         light: vscode.Uri.file(path.join(__dirname, '..', 'resources', this._enabled ? 'light' : 'dark', this.option.icon))
-      };
-   }
-
-   enabled(): boolean {
-      return this._enabled;
-   }
-
-   enable(): void {
-      if (this._enabled) return;
-      this._enabled = true;
-      this.iconPath = {
-         light: vscode.Uri.file(path.join(__dirname, '..', 'resources', 'light', this.option.icon)),
-         dark: vscode.Uri.file(path.join(__dirname, '..', 'resources', 'dark', this.option.icon))
-      };
-   }
-
-   disable(): void {
-      if (!this._enabled) return;
-      this._enabled = false;
-      this.iconPath = {
-         dark: vscode.Uri.file(path.join(__dirname, '..', 'resources', 'light', this.option.icon)),
-         light: vscode.Uri.file(path.join(__dirname, '..', 'resources', 'dark', this.option.icon))
-      };
-   }
-
-}
+export type UseSearchOptions = {
+    [K in SearchOptionId]: boolean;
+};
 
 export class Search {
 
    private readonly config: Config = Config.getInstance();
    private readonly disposables: vscode.Disposable[] = [];
+   private searchResultsProvider: SearchResultsProvider;
+   private searchResultsView: vscode.TreeView<SearchResultItem>;
+   private currentSearchKeyword: string = '';
+   private searchInputViewProvider?: SearchInputViewProvider;
 
    private useSearchOptions: UseSearchOptions = {
       [MatchCaseId]: false,
@@ -91,123 +36,190 @@ export class Search {
       [UseRegularExpressionId]: false
    };
 
-   constructor(useSearchOptions?: UseSearchOptions) {
+   constructor(private readonly extensionUri: vscode.Uri, useSearchOptions?: UseSearchOptions) {
+      this.searchResultsProvider = new SearchResultsProvider();
+      this.searchResultsView = vscode.window.createTreeView('daily-order.searchView', {
+         treeDataProvider: this.searchResultsProvider,
+         showCollapseAll: true
+      });
+
       this.disposables.push(
+         this.searchResultsView,
          ...this.registerCommands()
       );
       if (useSearchOptions) this.useSearchOptions = useSearchOptions;
+      this.updateContextKeysForAllOptions();
+      vscode.commands.executeCommand('setContext', 'dailyOrderSearch.hasResults', false);
+      vscode.commands.executeCommand('setContext', 'dailyOrderSearch.noResults', false);
+      this.searchResultsView.message = 'Enter search term in the input field above and press Enter or click Search.';
+   }
+
+   public setSearchInputViewProvider(provider: SearchInputViewProvider) {
+      this.searchInputViewProvider = provider;
+      this.searchInputViewProvider?.updateButtonStatesInWebview(this.useSearchOptions);
    }
 
    dispose() {
       this.disposables.forEach(d => d.dispose());
    }
 
-   private async runRipGrep(keyword: string, matchCase: boolean, matchWholeWord: boolean, useRegex: boolean): Promise<Match[] | string> {
-      if (!this.config.notesDir) return 'Notes directory is not found';
+   private async runRipGrep(keyword: string, matchCaseFlag: boolean, matchWholeWordFlag: boolean, useRegexFlag: boolean): Promise<Match[] | string> {
+      if (!this.config.notesDir) {
+         return 'Notes directory is not found';
+      }
 
-      const options: rgOptions = {
-         ...(useRegex ? { regex: keyword, multiline: true } : { string: keyword }),
-         ...{ matchCase, matchWholeWord }
-      };
+      let ripgrepOptions: rgOptions;
 
-      const matchesOrError = await rg(
-         this.config.notesDir.fsPath, options
-      ).catch((e: RipGrepError) => {
-         return e.stderr;
-      });
-      return matchesOrError;
-   }
+      if (useRegexFlag) {
+         ripgrepOptions = { regex: keyword };
+      } else {
+         ripgrepOptions = { string: keyword };
+      }
 
-   private async search(): Promise<boolean> {
-      const disposables: vscode.Disposable[] = [];
+      //The rg wrapper in ripgrep/index.ts handles the logic:
+      //- if options.matchCase is true, search is case-sensitive (no -i flag).
+      //- if options.matchCase is false or undefined, search is case-insensitive (-i flag is added).
+      //- if options.matchWholeWord is true, -w flag is added.
+      ripgrepOptions.multiline = true; //Keep multiline enabled
+      ripgrepOptions.matchCase = matchCaseFlag;
+      ripgrepOptions.matchWholeWord = matchWholeWordFlag;
+
       try {
-         return await new Promise((resolve, reject) => {
-            const quickPick = vscode.window.createQuickPick<SearchResult>();
-            const optionButtons = Object
-               .values(SearchOptions)
-               .map(value => new OptionButton(value, this.useSearchOptions[value.id]));
-
-            const updateResults = async (input: string) => {
-               if (input === '') {
-                  quickPick.items = [];
-                  return;
-               }
-               quickPick.busy = true;
-               quickPick.items = await this.searchByDefault(input);
-               quickPick.busy = false;
-            };
-
-            quickPick.placeholder = 'search';
-            quickPick.title = 'Search In Notes';
-            quickPick.buttons = optionButtons;
-            disposables.push(
-               quickPick.onDidAccept(() => {
-                  const [uri, lineNumber] = [quickPick.selectedItems[0]?.uri, quickPick.selectedItems[0]?.lineNumber];
-                  if (!uri || typeof lineNumber === 'undefined') return;
-                  const range = new vscode.Range(lineNumber, 0, lineNumber, 0);
-                  vscode.window.showTextDocument(uri, { selection: range }).then(editor => {
-                     editor.revealRange(range);
-                  });
-                  resolve(true);
-               }),
-               quickPick.onDidChangeValue(async value => {
-                  updateResults(value);
-               }),
-               quickPick.onDidTriggerButton(e => {
-                  const optionButton = optionButtons.find(button => button.tooltip === e.tooltip);
-                  if (!optionButton) return;
-                  if (optionButton.enabled()) {
-                     optionButton.disable();
-                     this.useSearchOptions[optionButton.option.id] = false;
-                  } else {
-                     optionButton.enable();
-                     this.useSearchOptions[optionButton.option.id] = true;
-                  }
-                  quickPick.buttons = Object.values(optionButtons);
-                  updateResults(quickPick.value);
-               }),
-               quickPick.onDidHide(() => {
-                  resolve(false);
-               })
-            );
-            quickPick.show();
-         });
-      } finally {
-         disposables.forEach(d => d.dispose());
+         const matches = await rg(this.config.notesDir.fsPath, ripgrepOptions);
+         return matches;
+      } catch (e) {
+         if (e instanceof RipGrepError) {
+            return e.stderr;
+         }
+         return e instanceof Error ? e.message : 'An unknown error occurred during search';
       }
    }
 
-   private async searchByDefault(input: string): Promise<SearchResult[]> {
-      const matchesOrError = await this.runRipGrep(input,
+   private clearSearchLogic(): void {
+      this.searchResultsProvider.clear();
+      this.currentSearchKeyword = '';
+      this.searchResultsView.message = 'Search cleared. Use the input field above to start a new search.';
+      vscode.commands.executeCommand('setContext', 'dailyOrderSearch.hasResults', false);
+      vscode.commands.executeCommand('setContext', 'dailyOrderSearch.noResults', false);
+      this.searchInputViewProvider?.clearInputInWebview();
+   }
+
+   public clearSearchCommand(): void {
+      this.clearSearchLogic();
+   }
+
+   public async performSearch(keyword: string): Promise<boolean> {
+      this.currentSearchKeyword = keyword.trim();
+      if (!this.currentSearchKeyword) {
+         this.clearSearchLogic();
+         return false;
+      }
+
+      this.searchResultsView.message = `Searching for "${this.currentSearchKeyword}"...`;
+      //Set hasResults to false initially, and noResults to false
+      vscode.commands.executeCommand('setContext', 'dailyOrderSearch.hasResults', false);
+      vscode.commands.executeCommand('setContext', 'dailyOrderSearch.noResults', false);
+
+      const matchesOrError = await this.runRipGrep(
+         this.currentSearchKeyword,
          this.useSearchOptions[MatchCaseId],
          this.useSearchOptions[MatchWholeWordId],
          this.useSearchOptions[UseRegularExpressionId]
       );
 
       if (typeof matchesOrError === 'string') {
-         return [new SearchResult(matchesOrError)];
+         vscode.window.showErrorMessage(`Search error: ${matchesOrError}`);
+         this.searchResultsProvider.clear();
+         this.searchResultsView.message = `Search error: ${matchesOrError}`;
+         vscode.commands.executeCommand('setContext', 'dailyOrderSearch.hasResults', false);
+         vscode.commands.executeCommand('setContext', 'dailyOrderSearch.noResults', true);
+         return false;
       } else if (!matchesOrError.length) {
-         return [new SearchResult('No matching results')];
+         this.searchResultsProvider.clear();
+         this.searchResultsView.message = `No results found for "${this.currentSearchKeyword}".`;
+         vscode.commands.executeCommand('setContext', 'dailyOrderSearch.hasResults', false);
+         vscode.commands.executeCommand('setContext', 'dailyOrderSearch.noResults', true);
+         return true;
       } else {
-         return matchesOrError
-            .sort((x, y) => x.path.text.localeCompare(y.path.text))
-            .map(match => {
-               const matchedLineText = match.lines.text.match(`${this.escapeStringRegex(match.submatches[0].match.text)}.*`);
-               return new SearchResult(vscode.Uri.file(match.path.text), matchedLineText ? matchedLineText[0] : match.lines.text, match.line_number - 1);
-            });
+         this.searchResultsProvider.refresh(matchesOrError);
+         this.searchResultsView.message = `Found ${matchesOrError.length} result(s) for "${this.currentSearchKeyword}".`;
+         vscode.commands.executeCommand('setContext', 'dailyOrderSearch.noResults', false);
+         vscode.commands.executeCommand('setContext', 'dailyOrderSearch.hasResults', true);
+         const firstElement = this.searchResultsProvider.getFirstFileNode();
+         if (firstElement) {
+            this.searchResultsView.reveal(firstElement, { expand: true, focus: false, select: false });
+         }
+         return true;
       }
    }
 
-   private escapeStringRegex(string: string) {
-      return escapeStringRegexp(string);
+   private async search(): Promise<void> {
+      if (this.searchInputViewProvider) {
+         this.searchInputViewProvider.focusInput();
+      } else {
+         //Fallback if webview isn't available
+         const keywordInput = await vscode.window.showInputBox({
+            placeHolder: 'Search in notes (e.g., keyword)',
+            prompt: 'Enter search term. Toggle options using icons in the view title.',
+            value: this.currentSearchKeyword
+         });
+
+         if (keywordInput === undefined) {
+            return;
+         }
+         if (keywordInput.trim() === '') {
+            this.clearSearchLogic();
+            return;
+         }
+         this.performSearch(keywordInput.trim());
+      }
+   }
+
+   private updateContextKey(optionId: SearchOptionId): void {
+      const optionKey = SearchOptionKeysById[optionId];
+      if (optionKey) {
+         vscode.commands.executeCommand('setContext', `dailyOrderSearch.${optionKey}Active`, this.useSearchOptions[optionId]);
+      }
+   }
+
+   private updateContextKeysForAllOptions(): void {
+      this.updateContextKey(MatchCaseId);
+      this.updateContextKey(MatchWholeWordId);
+      this.updateContextKey(UseRegularExpressionId);
+   }
+
+   public toggleSearchOption(optionId: SearchOptionId): void {
+      this.useSearchOptions[optionId] = !this.useSearchOptions[optionId];
+      this.updateContextKey(optionId);
+      this.searchInputViewProvider?.updateButtonStatesInWebview(this.useSearchOptions);
+      if (this.currentSearchKeyword) { //Re-run search if a keyword exists
+         this.performSearch(this.currentSearchKeyword);
+      }
    }
 
    private registerCommands(): vscode.Disposable[] {
       return [
          vscode.commands.registerCommand('daily-order.searchInNotes', () => {
             this.search();
+         }),
+         vscode.commands.registerCommand('daily-order.openSearchResult', (fileUri: vscode.Uri, lineNumber: number) => {
+            vscode.window.showTextDocument(fileUri, {
+               selection: new vscode.Range(lineNumber, 0, lineNumber, 0),
+               preserveFocus: false
+            });
+         }),
+         vscode.commands.registerCommand('daily-order.search.toggleMatchCase', () => {
+            this.toggleSearchOption(MatchCaseId);
+         }),
+         vscode.commands.registerCommand('daily-order.search.toggleWholeWord', () => {
+            this.toggleSearchOption(MatchWholeWordId);
+         }),
+         vscode.commands.registerCommand('daily-order.search.toggleUseRegex', () => {
+            this.toggleSearchOption(UseRegularExpressionId);
+         }),
+         vscode.commands.registerCommand('daily-order.clearSearch', () => {
+            this.clearSearchCommand();
          })
       ];
    }
-
 }
