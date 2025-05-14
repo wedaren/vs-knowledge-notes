@@ -100,23 +100,23 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                         }
                      }
 
-                     //2. Add general "intelligent note-taking assistant" prompt.
-                     messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, '你是一个智能笔记助手，请根据用户提供的笔记内容和上下文，提供有条理、清晰的回答和建议。'));
+                     ////2. Add general "intelligent note-taking assistant" prompt.
+                     //messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, '你是一个智能笔记助手，请根据用户提供的笔记内容和上下文，提供有条理、清晰的回答和建议。'));
 
-                     //3. Add content from the active Markdown note (if currentMarkdownFileUri is set)
-                     if (this.currentMarkdownFileUri) {
-                        try {
-                           const noteContentBytes = await vscode.workspace.fs.readFile(this.currentMarkdownFileUri);
-                           const noteContent = Buffer.from(noteContentBytes).toString('utf-8');
-                           if (noteContent.trim()) {
-                              messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, `这是当前打开的 Markdown 笔记的相关内容：\n${noteContent}`));
-                           }
-                        } catch (err: any) {
-                           console.error(`Failed to read note context from ${this.currentMarkdownFileUri.fsPath}:`, err);
-                           //Not adding a user-facing error message here to keep the chat flow clean,
-                           //but logging is important.
-                        }
-                     }
+                     ////3. Add content from the active Markdown note (if currentMarkdownFileUri is set)
+                     //if (this.currentMarkdownFileUri) {
+                     //try {
+                     //const noteContentBytes = await vscode.workspace.fs.readFile(this.currentMarkdownFileUri);
+                     //const noteContent = Buffer.from(noteContentBytes).toString('utf-8');
+                     //if (noteContent.trim()) {
+                     //messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, `这是当前打开的 Markdown 笔记的相关内容：\n${noteContent}`));
+                     //}
+                     //} catch (err: any) {
+                     //console.error(`Failed to read note context from ${this.currentMarkdownFileUri.fsPath}:`, err);
+                     ////Not adding a user-facing error message here to keep the chat flow clean,
+                     ////but logging is important.
+                     //}
+                     //}
 
                      //4. Add user's current message (data.text).
                      messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, data.text));
