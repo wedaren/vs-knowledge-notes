@@ -128,21 +128,47 @@ export class NoteExplorer {
          vscode.window.showErrorMessage('Notes directory is not set.');
          return;
       }
-      const folderUri = vscode.Uri.joinPath(notesDir, this.todayOrderDir);
-      if (! this.fileSystemProvider.exists(folderUri)) {
-         await this.fileSystemProvider.createDirectory(folderUri);
+
+      const folderUri = await this.ensureTodayOrderFolderExists(notesDir);
+      if (!folderUri) {
+         return;
       }
 
-      const today = dayjs();
-      const noteFileName = today.format('YYYY-MM-DD') + '.md';
-      const noteFileUri = vscode.Uri.joinPath(folderUri, noteFileName);
-      if (! this.fileSystemProvider.exists(noteFileUri)) {
-         const template = `# ${today.format('YYYY-MM-DD')}\n\n`;
-         await this.fileSystemProvider.writeFile(noteFileUri, Buffer.from(template), { create: true, overwrite: false });
-      }
+      const noteFileUri = this.getTodayNoteFileUri(folderUri);
+      await this.ensureTodayNoteFileExists(noteFileUri);
       await this.openFile(noteFileUri);
    }
 
+   private async ensureTodayOrderFolderExists(notesDir: vscode.Uri): Promise<vscode.Uri | undefined> {
+      const folderUri = vscode.Uri.joinPath(notesDir, this.todayOrderDir);
+      if (!this.fileSystemProvider.exists(folderUri)) {
+         try {
+            await this.fileSystemProvider.createDirectory(folderUri);
+         } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create directory ${this.todayOrderDir}: ${error}`);
+            return undefined;
+         }
+      }
+      return folderUri;
+   }
+
+   private getTodayNoteFileUri(folderUri: vscode.Uri): vscode.Uri {
+      const today = dayjs();
+      const noteFileName = today.format('YYYY-MM-DD') + '.md';
+      return vscode.Uri.joinPath(folderUri, noteFileName);
+   }
+
+   private async ensureTodayNoteFileExists(noteFileUri: vscode.Uri): Promise<void> {
+      if (!this.fileSystemProvider.exists(noteFileUri)) {
+         const today = dayjs(path.basename(noteFileUri.fsPath, '.md')); // Extract date from filename
+         const template = `# ${today.format('YYYY-MM-DD')}\n\n`;
+         try {
+            await this.fileSystemProvider.writeFile(noteFileUri, Buffer.from(template), { create: true, overwrite: false });
+         } catch (error) {
+            vscode.window.showErrorMessage(`Failed to create note file ${noteFileUri.fsPath}: ${error}`);
+         }
+      }
+   }
 
    dispose(): void {
       this.disposables.forEach(d => d.dispose());
