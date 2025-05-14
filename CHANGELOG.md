@@ -1,4 +1,15 @@
 # Change Log
+
+## [1.1.22] - 2025-05-15
+
+- 添加搜索功能，支持匹配大小写、整词匹配和正则表达式选项
+- 添加新命令以在笔记资源管理器中创建对应的 .pompt.md 文件
+- 修复 .prompt.md 和 .chatlog.md 文件不支持 LLM Chat 的问题
+- 打开 markdown 笔记时，自动聚焦到对应的 LLM Chat
+- 重构注释当前 Markdown 笔记作为 Prompt 上下文的逻辑
+- LLM chat Panel 只在 markdown 笔记打开时才显示
+- 重构更新文件打开逻辑，统一使用 openFile 命令替代 reveal
+
 ## [1.1.21] - 2025-05-14
 
 - 移除不必要的命令注册，优化文件补全提供者和笔记浏览器功能
