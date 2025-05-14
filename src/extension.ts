@@ -90,7 +90,9 @@ export function activate(context: vscode.ExtensionContext) {
 
    function checkIfSupportedLLMChat(uri: vscode.Uri): boolean {
       if(!checkIfFileInNotesDir(uri)) return false;
-      // Check if the file is a markdown file
+      if (uri.fsPath.endsWith('.prompt.md')) return false;
+      if (uri.fsPath.endsWith('.chatlog.md')) return false;
+      //Check if the file is a markdown file
       const fileExtension = path.extname(uri.fsPath).toLowerCase();
       return fileExtension === '.md' || fileExtension === '.markdown';
    }
@@ -103,8 +105,8 @@ export function activate(context: vscode.ExtensionContext) {
          vscode.commands.executeCommand('setContext', 'supportedLLMChat', false);
       }
 
-      checkIfFileInNotesDir(editor.document.uri) && noteExplorer.reveal(editor.document.uri)
-      
+      checkIfFileInNotesDir(editor.document.uri) && noteExplorer.reveal(editor.document.uri);
+
    }
 
    //Listen for active text editor changes
