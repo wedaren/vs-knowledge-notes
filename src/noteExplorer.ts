@@ -155,6 +155,7 @@ export class NoteExplorer {
          vscode.commands.registerCommand('daily-order.noteExplorer.openFile', (uri?: vscode.Uri) => this.openFile(uri)),
          vscode.commands.registerCommand('daily-order.noteExplorer.refresh', () => this.refresh()),
          vscode.commands.registerCommand('daily-order.noteExplorer.newFile', (file?: File) => this.createNewFile(file)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.newPrompt', (file?: File) => this.createNewPromptOfFile(file)),
          //TODO:这个命令应该属于 FileSystemProvider
          vscode.commands.registerCommand('daily-order.noteExplorer.createFile', (uri?: vscode.Uri) => this.createNewFileByName(uri)),
          vscode.commands.registerCommand('daily-order.noteExplorer.newFolder', (file?: File) => this.createNewFolder(file)),
@@ -245,6 +246,19 @@ export class NoteExplorer {
       if (!input) return;
       const filename = vscode.Uri.file(input);
 
+      this.fileSystemProvider.writeFile(filename, new Uint8Array(), { create: true, overwrite: false });
+
+      this.openFile(filename);
+   }
+   private async createNewPromptOfFile(file?: File): Promise<void> {
+      if (!this.config.notesDir) return;
+      if (!file && !this.treeView.selection.length) return;
+      const selectedFile: File = file ? file : this.treeView.selection.length ? this.treeView.selection[0] : new File(this.config.notesDir, vscode.FileType.Directory);
+      if(selectedFile.uri.fsPath.endsWith('.prompt.md')) return;
+      if (selectedFile.uri.fsPath.endsWith('.chatlog.md')) return;
+      const newFilePath = selectedFile.uri.fsPath.replace('.md', '.prompt.md');
+      if (this.fileSystemProvider.exists(vscode.Uri.file(newFilePath)))return;
+      const filename = vscode.Uri.file(newFilePath);
       this.fileSystemProvider.writeFile(filename, new Uint8Array(), { create: true, overwrite: false });
 
       this.openFile(filename);

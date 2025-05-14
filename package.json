@@ -39,6 +39,12 @@
             "icon": "$(extensions-refresh)"
          },
          {
+            "command": "daily-order.noteExplorer.newPrompt",
+            "category": "Daily Order",
+            "title": "New Prompt",
+            "icon": "$(new-file)"
+         },
+         {
             "command": "daily-order.noteExplorer.newFile",
             "category": "Daily Order",
             "title": "New File",
@@ -310,6 +316,11 @@
             }
          ],
          "view/item/context": [
+            {
+               "command": "daily-order.noteExplorer.newPrompt",
+               "when": "view == daily-order.noteExplorer && viewItem == daily-order.File",
+               "group": "1_creation@1"
+            },
             {
                "command": "daily-order.noteExplorer.newFile",
                "when": "view == daily-order.noteExplorer",
