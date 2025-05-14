@@ -41,7 +41,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       _token: vscode.CancellationToken,
    ) {
       this._view = webviewView;
-
       webviewView.webview.options = {
          enableScripts: true,
          localResourceRoots: [this._extensionUri],
@@ -176,44 +175,35 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       //Model availability is explicitly sent when webviewReady becomes true (handled in 'webviewReady' case).
    }
 
-   public async handleEditorChange(editor: vscode.TextEditor | undefined): Promise<void> {
-      if (editor && editor.document.languageId === 'markdown' && editor.document.uri.scheme === 'file') {
-         const filePath = editor.document.fileName;
-         const fileUri = editor.document.uri;
+   public async setReadlyPanel(editor: vscode.TextEditor): Promise<void> {
+      const filePath = editor.document.fileName;
+      const fileUri = editor.document.uri;
 
-         //If a chatlog or prompt file is opened directly, clear all context and return.
-         if (filePath.endsWith('.chatlog.md') || filePath.endsWith('.prompt.md')) {
-            this.currentMarkdownFileUri = undefined;
-            this.currentPromptFileUri = undefined;
-            this.currentChatlogFileUri = undefined;
-            this.updateChatHistory();
-            return;
-         }
-
-         //This is a main .md file
-         this.currentMarkdownFileUri = fileUri;
-
-         //Set associated prompt file URI
-         const promptFilePath = filePath.replace(/\.md$/, '.prompt.md');
-         try {
-            this.currentPromptFileUri = vscode.Uri.file(promptFilePath);
-         } catch (e) {
-            console.error('Error creating prompt file URI: ', e);
-            this.currentPromptFileUri = undefined;
-         }
-
-         //Set and load associated chatlog file
-         const chatlogFilePath = filePath.replace(/\.md$/, '.chatlog.md');
-         this.currentChatlogFileUri = vscode.Uri.file(chatlogFilePath);
-         this.updateChatHistory(); //Call updateChatHistory after currentChatlogFileUri is set
-
-      } else {
-         //No valid editor or not a markdown file, clear all context
+      //If a chatlog or prompt file is opened directly, clear all context and return.
+      if (filePath.endsWith('.chatlog.md') || filePath.endsWith('.prompt.md')) {
          this.currentMarkdownFileUri = undefined;
          this.currentPromptFileUri = undefined;
          this.currentChatlogFileUri = undefined;
          this.updateChatHistory();
+         return;
       }
+
+      //This is a main .md file
+      this.currentMarkdownFileUri = fileUri;
+
+      //Set associated prompt file URI
+      const promptFilePath = filePath.replace(/\.md$/, '.prompt.md');
+      try {
+         this.currentPromptFileUri = vscode.Uri.file(promptFilePath);
+      } catch (e) {
+         console.error('Error creating prompt file URI: ', e);
+         this.currentPromptFileUri = undefined;
+      }
+
+      //Set and load associated chatlog file
+      const chatlogFilePath = filePath.replace(/\.md$/, '.chatlog.md');
+      this.currentChatlogFileUri = vscode.Uri.file(chatlogFilePath);
+      this.updateChatHistory(); //Call updateChatHistory after currentChatlogFileUri is set
    }
 
    private _getHtmlForWebview(webview: vscode.Webview): string {

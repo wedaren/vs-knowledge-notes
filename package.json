@@ -228,7 +228,8 @@
                "name": "LLM Chat",
                "type": "webview",
                "icon": "$(comment-discussion)",
-               "contextualTitle": "LLM Chat"
+               "contextualTitle": "LLM Chat",
+               "when": "supportedLLMChat"
             }
          ]
       },
@@ -474,7 +475,8 @@
       }
    },
    "extensionDependencies": [
-      "yzhang.markdown-all-in-one","davidanson.vscode-markdownlint"
+      "yzhang.markdown-all-in-one",
+      "davidanson.vscode-markdownlint"
    ],
    "scripts": {
       "vscode:prepublish": "npm run package",

@@ -76,27 +76,35 @@ export function activate(context: vscode.ExtensionContext) {
       )
    );
 
-   function checkIfFileInNotesDir(filePath: string): boolean {
+   function checkIfFileInNotesDir(uri: vscode.Uri): boolean {
       const notesDir = Config.getInstance().notesDir;
       if (!notesDir) return false;
 
       //Normalize paths to avoid issues with different OS path separators
-      const normalizedFilePath = path.normalize(filePath);
+      const normalizedFilePath = path.normalize(uri.fsPath);
       const normalizedNotesDir = path.normalize(notesDir.fsPath);
 
       //Check if the file path starts with the notes directory path
       return normalizedFilePath.startsWith(normalizedNotesDir);
    }
 
+   function checkIfSupportedLLMChat(uri: vscode.Uri): boolean {
+      if(!checkIfFileInNotesDir(uri)) return false;
+      // Check if the file is a markdown file
+      const fileExtension = path.extname(uri.fsPath).toLowerCase();
+      return fileExtension === '.md' || fileExtension === '.markdown';
+   }
 
    async function processNotesEditor(editor: vscode.TextEditor) {
-      const isInNotesDir = checkIfFileInNotesDir(editor.document.uri.fsPath);
-      if (!isInNotesDir) {
-         return;
+      if(checkIfSupportedLLMChat(editor.document.uri)) {
+         vscode.commands.executeCommand('setContext', 'supportedLLMChat', true);
+         await chatViewProvider.setReadlyPanel(editor);
+      } else {
+         vscode.commands.executeCommand('setContext', 'supportedLLMChat', false);
       }
-      await noteExplorer.reveal(editor.document.uri);
-      await chatViewProvider.handleEditorChange(editor);
 
+      checkIfFileInNotesDir(editor.document.uri) && noteExplorer.reveal(editor.document.uri)
+      
    }
 
    //Listen for active text editor changes
