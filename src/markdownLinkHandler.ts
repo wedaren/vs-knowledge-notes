@@ -91,7 +91,7 @@ export class MarkdownLinkHandler {
 
        const targetPath = path.resolve(this.config.notesDir.path, link);
        const targetUri = vscode.Uri.file(targetPath);
-       await vscode.commands.executeCommand('daily-order.noteExplorer.reveal', targetUri);
+       await vscode.commands.executeCommand('daily-order.noteExplorer.openFile', targetUri);
     }
 
     dispose() {

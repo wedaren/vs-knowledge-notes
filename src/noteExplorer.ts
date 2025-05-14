@@ -140,7 +140,7 @@ export class NoteExplorer {
          const template = `# ${today.format('YYYY-MM-DD')}\n\n`;
          await this.fileSystemProvider.writeFile(noteFileUri, Buffer.from(template), { create: true, overwrite: false });
       }
-      await this.revealFile(noteFileUri);
+      await this.openFile(noteFileUri);
    }
 
 
@@ -176,9 +176,12 @@ export class NoteExplorer {
    }
    async revealFile(uri?: vscode.Uri): Promise<void> {
       if (!uri) return;
-
-      await this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
+      await this.reveal(uri);
       this.openFile(uri);
+   }
+   async reveal(uri?: vscode.Uri): Promise<void>{
+      if (!uri) return;
+      await this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
    }
 
    private async showFileNameInputBox(dirname?: vscode.Uri, initialValue?: string): Promise<string | undefined> {
@@ -284,7 +287,7 @@ export class NoteExplorer {
          }
       } else {
          //如果文件已存在，则直接打开
-         this.revealFile(file);
+         this.openFile(file);
       }
    }
 

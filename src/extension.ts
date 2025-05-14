@@ -76,16 +76,37 @@ export function activate(context: vscode.ExtensionContext) {
       )
    );
 
+   function checkIfFileInNotesDir(filePath: string): boolean {
+      const notesDir = Config.getInstance().notesDir;
+      if (!notesDir) return false;
+
+      //Normalize paths to avoid issues with different OS path separators
+      const normalizedFilePath = path.normalize(filePath);
+      const normalizedNotesDir = path.normalize(notesDir.fsPath);
+
+      //Check if the file path starts with the notes directory path
+      return normalizedFilePath.startsWith(normalizedNotesDir);
+   }
+
+
+   async function processNotesEditor(editor: vscode.TextEditor) {
+      const isInNotesDir = checkIfFileInNotesDir(editor.document.uri.fsPath);
+      if (!isInNotesDir) {
+         return;
+      }
+      await noteExplorer.reveal(editor.document.uri);
+      await chatViewProvider.handleEditorChange(editor);
+
+   }
+
    //Listen for active text editor changes
    vscode.window.onDidChangeActiveTextEditor(async editor => {
-      await chatViewProvider.handleEditorChange(editor);
-      await noteExplorer.revealFile(editor?.document.uri);
+      if(!editor) return;
+      processNotesEditor(editor);
    });
 
    //Handle the initially active editor
-   if (vscode.window.activeTextEditor) {
-      chatViewProvider.handleEditorChange(vscode.window.activeTextEditor);
-   }
+   if (vscode.window.activeTextEditor) processNotesEditor(vscode.window.activeTextEditor);
 
    context.subscriptions.push(
       watcher,

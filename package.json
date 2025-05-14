@@ -190,9 +190,6 @@
             "when": "focusedView == daily-order.noteExplorer && !inputFocus"
          },
          {
-            "command": "daily-order.noteExplorer.reveal"
-         },
-         {
             "command": "daily-order.noteExplorer.openInNewWindow",
             "key": "cmd+shift+n",
             "mac": "cmd+shift+n",
