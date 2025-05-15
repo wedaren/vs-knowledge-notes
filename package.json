@@ -21,6 +21,29 @@
    ],
    "main": "./dist/extension.js",
    "contributes": {
+      "languageModelTools": [
+         {
+            "name": "daily_order_add_note",
+            "displayName": "Add to Today's Note",
+            "modelDescription": "Use this tool to append text to the daily note file. The note file is named with the current date in YYYY-MM-DD.md format and located in the 'TodayOrder' subdirectory of the notes directory.",
+            "canBeReferencedInPrompt": true,
+            "toolReferenceName": "addNote",
+            "icon": "$(notebook-write)",
+            "userDescription": "Appends text to today's note.",
+            "inputSchema": {
+               "type": "object",
+               "properties": {
+                  "textToAppend": {
+                     "type": "string",
+                     "description": "The text content to append to today's note file."
+                  }
+               },
+               "required": [
+                  "textToAppend"
+               ]
+            }
+         }
+      ],
       "commands": [
          {
             "command": "daily-order.setNotesDir",

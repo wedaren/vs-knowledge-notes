@@ -16,6 +16,7 @@ import { TimestampAssistant } from './assistants/timestampAssistant';
 import { PromptCompletionProvider } from './promptCompletionProvider';
 import { ChatViewProvider } from './chatViewProvider';
 import { SearchInputViewProvider } from './searchInputViewProvider';
+import { AddNoteTool } from './languageModelTools'; // Added import
 
 export async function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
@@ -65,7 +66,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
    //注册 Markdown 链接处理器
    const markdownLinkHandler = new MarkdownLinkHandler();
-   const noteExplorer = new NoteExplorer(fileSystemProvider);
+   const noteExplorer = NoteExplorer.getInstance(fileSystemProvider); // Use singleton instance
 
    const chatViewProvider = new ChatViewProvider(context.extensionUri);
    context.subscriptions.push(
@@ -130,7 +131,14 @@ export async function activate(context: vscode.ExtensionContext) {
    //Handle the initially active editor
    if (vscode.window.activeTextEditor) processNotesEditor(vscode.window.activeTextEditor);
 
+   const addNoteTool = new AddNoteTool(fileSystemProvider); // Register the AddNoteTool
+   const disposable = vscode.lm.registerTool('daily_order_add_note', addNoteTool);
+   context.subscriptions.push(disposable);
+
    context.subscriptions.push(
+      vscode.commands.registerCommand('daily-order.focusOnTodayOrderNote', () => {
+         noteExplorer.focusOnTodayOrderNote();
+      }),
       watcher,
       Config.getInstance().setListener(),
       noteExplorer,

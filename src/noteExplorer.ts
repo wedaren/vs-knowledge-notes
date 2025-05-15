@@ -96,7 +96,7 @@ class TreeDataProvider implements vscode.TreeDataProvider<File> {
 
 export class NoteExplorer {
 
-
+   private static instance: NoteExplorer;
    private readonly treeDataProvider: TreeDataProvider;
    private readonly treeView: vscode.TreeView<File>;
    private readonly config: Config = Config.getInstance();
@@ -104,7 +104,7 @@ export class NoteExplorer {
    private readonly todayOrderDir: string = 'TodayOrder';
    private clipboard?: Clipboard;
 
-   constructor(private readonly fileSystemProvider: FileSystemProvider) {
+   private constructor(private readonly fileSystemProvider: FileSystemProvider) {
       this.treeDataProvider = new TreeDataProvider(fileSystemProvider);
       this.treeView = vscode.window.createTreeView('daily-order.noteExplorer', { treeDataProvider: this.treeDataProvider, canSelectMany: true, showCollapseAll: true });
 
@@ -120,6 +120,13 @@ export class NoteExplorer {
          }),
          ...this.registerCommands()
       );
+   }
+
+   public static getInstance(fileSystemProvider: FileSystemProvider): NoteExplorer {
+      if (!NoteExplorer.instance) {
+         NoteExplorer.instance = new NoteExplorer(fileSystemProvider);
+      }
+      return NoteExplorer.instance;
    }
 
    async focusOnTodayOrderNote() {
@@ -139,7 +146,7 @@ export class NoteExplorer {
       await this.openFile(noteFileUri);
    }
 
-   private async ensureTodayOrderFolderExists(notesDir: vscode.Uri): Promise<vscode.Uri | undefined> {
+   public async ensureTodayOrderFolderExists(notesDir: vscode.Uri): Promise<vscode.Uri | undefined> {
       const folderUri = vscode.Uri.joinPath(notesDir, this.todayOrderDir);
       if (!this.fileSystemProvider.exists(folderUri)) {
          try {
@@ -152,13 +159,13 @@ export class NoteExplorer {
       return folderUri;
    }
 
-   private getTodayNoteFileUri(folderUri: vscode.Uri): vscode.Uri {
+   public getTodayNoteFileUri(folderUri: vscode.Uri): vscode.Uri {
       const today = dayjs();
       const noteFileName = today.format('YYYY-MM-DD') + '.md';
       return vscode.Uri.joinPath(folderUri, noteFileName);
    }
 
-   private async ensureTodayNoteFileExists(noteFileUri: vscode.Uri): Promise<void> {
+   public async ensureTodayNoteFileExists(noteFileUri: vscode.Uri): Promise<void> {
       if (!this.fileSystemProvider.exists(noteFileUri)) {
          const today = dayjs(path.basename(noteFileUri.fsPath, '.md')); // Extract date from filename
          const template = `# ${today.format('YYYY-MM-DD')}\n\n`;
