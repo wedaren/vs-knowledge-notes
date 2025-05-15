@@ -75,14 +75,18 @@ export class GitService {
                 await this.executeCommand('git pull --rebase', directoryPath);
              } catch (rebaseError: any) {
                 if (rebaseError.message && rebaseError.message.includes('CONFLICT')) {
-                   vscode.window.showErrorMessage('拉取远程更改时发生合并冲突。请手动解决冲突后，执行 "git rebase --continue"，然后重试。或者执行 "git rebase --abort" 中止变基。');
+                   const conflictFiles = await this.executeCommand('git diff --name-only --diff-filter=U', directoryPath);
+                   vscode.window.showWarningMessage(
+                      `拉取远程更改时发生合并冲突，以下文件存在冲突：\n${conflictFiles.stdout.trim()}\n已自动尝试继续变基。请检查提交历史确保合并正确。`
+                   );
+                   await this.executeCommand('git rebase --continue', directoryPath);
                 } else if (rebaseError.stderr && rebaseError.stderr.includes('could not lock config file')) {
                    vscode.window.showErrorMessage('无法锁定配置文件，请检查是否有其他进程正在使用该文件。');
-                }
-                else {
+                   return; //阻止后续的 push 操作
+                } else {
                    vscode.window.showErrorMessage(`从远程仓库拉取更改失败: ${rebaseError.message}`);
+                   return; //阻止后续的 push 操作
                 }
-                return; //阻止后续的 push 操作
              }
 
              progress.report({ message: '推送到远程仓库...' });
