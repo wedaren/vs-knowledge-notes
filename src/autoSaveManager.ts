@@ -19,10 +19,19 @@ export class AutoSaveManager {
           })
        );
 
+       //监听手动保存
+       this.disposables.push(
+          vscode.workspace.onDidSaveTextDocument(document => {
+             if (this.shouldAutoSave(document)) {
+                this.applyMarkdownlintFixAllIfEnabled();
+             }
+          })
+       );
+
        //监听配置变化
        this.disposables.push(
           this.config.onDidChangeConfig(configItems => {
-             if (configItems?.includes(Config.ConfigItem.NotesDir)) {
+             if (configItems?.includes(Config.ConfigItem.NotesDir) || configItems?.includes(Config.ConfigItem.MarkdownlintFixAllOnSave)) {
                 //当笔记目录改变时，重新检查所有打开的文档
                 vscode.workspace.textDocuments.forEach(document => {
                    if (this.shouldAutoSave(document)) {
@@ -68,8 +77,16 @@ export class AutoSaveManager {
 
        //创建一个新的定时器，1秒后执行自动保存
        this.saveTimeout = setTimeout(() => {
-          document.save();
+          document.save().then(() => {
+            this.applyMarkdownlintFixAllIfEnabled();
+          });
        }, 1000);
+    }
+
+    private applyMarkdownlintFixAllIfEnabled(): void {
+       if (this.config.markdownlintFixAllOnSave) {
+          vscode.commands.executeCommand('markdownlint.fixAll');
+       }
     }
 
     public dispose(): void {

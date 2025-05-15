@@ -116,6 +116,15 @@ export class Config {
       this._onDidChangeConfig.fire([Config.ConfigItem.PromptsDir]);
    }
 
+   get markdownlintFixAllOnSave(): boolean {
+      return this.workspaceConfig.get('markdownlintFixAllOnSave') ?? true; // Default to true
+   }
+
+   set markdownlintFixAllOnSave(enable: boolean) {
+      this.workspaceConfig.update('markdownlintFixAllOnSave', enable, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.MarkdownlintFixAllOnSave]);
+   }
+
    //#endregion
 
    private _displayMode: DisplayMode = DisplayMode.Edit;
@@ -167,7 +176,8 @@ export namespace Config {
       ShowHiddenFiles: 'showHiddenFiles',
       GitAutoSave: 'gitAutoSave',
       GitAutoSaveInterval: 'gitAutoSaveInterval',
-      PromptsDir: 'promptsDir'
+      PromptsDir: 'promptsDir',
+      MarkdownlintFixAllOnSave: 'markdownlintFixAllOnSave'
    } as const;
    export const PreviewEngine = {
       Default: 'default',
