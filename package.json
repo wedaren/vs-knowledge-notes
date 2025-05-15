@@ -25,7 +25,7 @@
          {
             "name": "daily_order_add_note",
             "displayName": "Add to Today's Note",
-            "modelDescription": "Use this tool to append text to the daily note file. The note file is named with the current date in YYYY-MM-DD.md format and located in the 'TodayOrder' subdirectory of the notes directory.",
+            "modelDescription": "每次对话中，总结对话内容添加到今天的笔记中。",
             "canBeReferencedInPrompt": true,
             "toolReferenceName": "addNote",
             "icon": "$(notebook-write)",
