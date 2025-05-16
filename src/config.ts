@@ -125,6 +125,15 @@ export class Config {
       this._onDidChangeConfig.fire([Config.ConfigItem.MarkdownlintFixAllOnSave]);
    }
 
+   get autoSaveDelay(): number {
+      return this.workspaceConfig.get('autoSaveDelay') ?? 6666; // Default to 1500ms
+   }
+
+   set autoSaveDelay(delay: number) {
+      this.workspaceConfig.update('autoSaveDelay', delay, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.AutoSaveDelay]);
+   }
+
    //#endregion
 
    private _displayMode: DisplayMode = DisplayMode.Edit;
@@ -177,7 +186,8 @@ export namespace Config {
       GitAutoSave: 'gitAutoSave',
       GitAutoSaveInterval: 'gitAutoSaveInterval',
       PromptsDir: 'promptsDir',
-      MarkdownlintFixAllOnSave: 'markdownlintFixAllOnSave'
+      MarkdownlintFixAllOnSave: 'markdownlintFixAllOnSave',
+      AutoSaveDelay: 'autoSaveDelay' // Added new config item
    } as const;
    export const PreviewEngine = {
       Default: 'default',

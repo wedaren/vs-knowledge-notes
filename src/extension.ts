@@ -23,6 +23,8 @@ export async function activate(context: vscode.ExtensionContext) {
    const watcher = Watcher.getInstance();
    watcher.watch(fileSystemProvider);
    const gitAutoSaveManager = GitAutoSaveManager.getInstance();
+   const autoSaveManager = AutoSaveManager.getInstance(); // Ensure instance is created
+
    //注册 prompt 补全功能
    const promptCompletionProvider = new PromptCompletionProvider();
    const promptProvider = vscode.languages.registerCompletionItemProvider(
@@ -134,6 +136,13 @@ export async function activate(context: vscode.ExtensionContext) {
    const addNoteTool = new AddNoteTool(fileSystemProvider); //Register the AddNoteTool
    const disposable = vscode.lm.registerTool('daily_order_add_note', addNoteTool);
    context.subscriptions.push(disposable);
+
+   // Register the command to toggle auto-save pause
+   context.subscriptions.push(
+      vscode.commands.registerCommand('daily-order.toggleAutoSavePause', () => { 
+         autoSaveManager.toggleAutoSavePause();
+      })
+   );
 
    context.subscriptions.push(
       vscode.commands.registerCommand('daily-order.focusOnTodayOrderNote', () => {
