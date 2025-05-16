@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.1.25] - $(date +'%Y-%m-%d')
+
+- feat: Add configurable auto-save delay and pause functionality
+- feat: 添加历史消息选择功能，增强聊天体验
+- feat: git 实现提交队列处理，优化笔记自动保存的体验
+- fix: 优化 Git 合并冲突处理，自动尝试继续变基并提示冲突文件
+
 ## [1.1.24] - 2025-05-15
 
 - 添加 markdownlint 自动修复选项，增强文档保存体验
