@@ -66,7 +66,7 @@ body {
 }
 
 /* NEW: Styles for the container of the model label and select dropdown */
-.model-selector-container,.history-selector-container {
+.model-selector-container {
   display: flex;
   align-items: center; /* Vertically align label and select */
   gap: 8px; /* Space between label and select */
@@ -76,7 +76,7 @@ body {
   white-space: nowrap; /* Prevent label from wrapping */
 }
 
-#model-selector,#history-count-selector {
+#model-selector {
   /* Let it take up a reasonable amount of space, but not too much */
   flex-grow: 0;
   width: 100px;
