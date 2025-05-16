@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.1.26] - 2025-05-16
+
+- Revert "feat: 添加历史消息选择功能，增强聊天体验"
+- chore: update release process and set v1.1.25 release date to 2025-05-16
+
 ## [1.1.25] - 2025-05-16
 
 - feat: Add configurable auto-save delay and pause functionality
