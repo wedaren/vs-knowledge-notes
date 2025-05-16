@@ -17,13 +17,14 @@ import { PromptCompletionProvider } from './promptCompletionProvider';
 import { ChatViewProvider } from './chatViewProvider';
 import { SearchInputViewProvider } from './searchInputViewProvider';
 import { AddNoteTool } from './languageModelTools'; //Added import
+import { thinkerHandler } from './thinkerChatParticipant'; //导入 thinkerHandler
 
 export async function activate(context: vscode.ExtensionContext) {
    const fileSystemProvider = new FileSystemProvider();
    const watcher = Watcher.getInstance();
    watcher.watch(fileSystemProvider);
    const gitAutoSaveManager = GitAutoSaveManager.getInstance();
-   const autoSaveManager = AutoSaveManager.getInstance(); // Ensure instance is created
+   const autoSaveManager = AutoSaveManager.getInstance(); //Ensure instance is created
 
    //注册 prompt 补全功能
    const promptCompletionProvider = new PromptCompletionProvider();
@@ -137,9 +138,13 @@ export async function activate(context: vscode.ExtensionContext) {
    const disposable = vscode.lm.registerTool('daily_order_add_note', addNoteTool);
    context.subscriptions.push(disposable);
 
-   // Register the command to toggle auto-save pause
+   const thinker = vscode.chat.createChatParticipant('daily-order.thinker', thinkerHandler);
+   //你可以为 thinker 设置一个图标
+   //thinker.iconPath = vscode.Uri.joinPath(context.extensionUri, 'tutor.jpeg');
+
+   //Register the command to toggle auto-save pause
    context.subscriptions.push(
-      vscode.commands.registerCommand('daily-order.toggleAutoSavePause', () => { 
+      vscode.commands.registerCommand('daily-order.toggleAutoSavePause', () => {
          autoSaveManager.toggleAutoSavePause();
       })
    );
