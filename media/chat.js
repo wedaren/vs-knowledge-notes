@@ -6,6 +6,7 @@
    const chatInput = document.getElementById('chat-input');
    const sendButton = document.getElementById('send-button');
    const modelSelector = document.getElementById('model-selector');
+   const historyCountSelector = document.getElementById('history-count-selector'); //Get the new dropdown
    let currentChatModelId = null; //Stores the modelId for new assistant messages, set by extension
 
    //Handle dark/light theme
@@ -23,9 +24,13 @@
    sendButton.addEventListener('click', () => {
       const messageText = chatInput.value;
       if (messageText.trim() !== '') {
+         const selectedHistoryCount = historyCountSelector ? parseInt(historyCountSelector.value, 10) : 0;
+         const historyMessages = getChatHistory(selectedHistoryCount);
+
          vscode.postMessage({
             type: 'sendMessage',
-            text: messageText
+            text: messageText,
+            history: historyMessages //Include selected history
          });
          //Add user message to UI immediately for responsiveness
          addMessageToUI(messageText, 'user'); //Timestamp will be generated
@@ -67,7 +72,7 @@
                }
             } else if (modelSelector && !message.modelId) {
                //If modelId is cleared (e.g., to a default state), optionally update selector
-               //Example: modelSelector.value = modelSelector.options[0].value; //Reset to first option
+               //Example: modelSelector.value = modelSelector.options[0].value; // Reset to first option
             }
             break;
          case 'loadHistory':
@@ -94,11 +99,6 @@
                            addMessageToUI(userMatch[1].trim(), 'user'); //No timestamp, no modelId
                         } else if (assistantMatch && assistantMatch[1] !== undefined) {
                            addMessageToUI(assistantMatch[1].trim(), 'assistant'); //No timestamp, no modelId
-                        } else {
-                           console.warn('Could not parse chat history block:', block);
-                           if (block.trim()) {
-                              addMessageToUI(block.trim(), 'assistant'); //Default to assistant
-                           }
                         }
                      }
                   }
@@ -126,10 +126,10 @@
 
    //function populateModelSelector(models) {
    //if (!modelSelector) return;
-   ////Store the current selected value if it exists and is not the default, to try and preserve selection
+   //// Store the current selected value if it exists and is not the default, to try and preserve selection
    //const currentSelectedValue = modelSelector.value !== 'default' ? modelSelector.value : null;
    //
-   ////Clear existing options, but keep the first one (default)
+   //// Clear existing options, but keep the first one (default)
    //while (modelSelector.options.length > 1) {
    //modelSelector.remove(1);
    //}
@@ -141,7 +141,7 @@
    //modelSelector.appendChild(option);
    //});
    //
-   ////If a previous selection existed and is still in the new list, re-select it
+   //// If a previous selection existed and is still in the new list, re-select it
    //if (currentSelectedValue) {
    //const stillExists = Array.from(modelSelector.options).some(opt => opt.value === currentSelectedValue);
    //if (stillExists) {
@@ -197,6 +197,29 @@
             });
          }
       }
+   }
+
+   function getChatHistory(count) {
+      const messages = [];
+      const messageElements = chatMessages.querySelectorAll('.message');
+      const startIndex = count === -1 ? 0 : Math.max(0, messageElements.length - count);
+
+      for (let i = startIndex; i < messageElements.length; i++) {
+         const messageElement = messageElements[i];
+         const sender = messageElement.classList.contains('user-message') ? 'User' : 'Assistant';
+         const text = messageElement.querySelector('pre').textContent;
+         const timestamp = messageElement.dataset.timestamp;
+
+         let header = `[${timestamp}] ${sender}`;
+         if (sender === 'Assistant') {
+            const modelId = messageElement.dataset.modelId; //Retrieve stored modelId
+            if (modelId) { //Check if modelId exists and is not empty
+               header += `(${modelId})`;
+            }
+         }
+         messages.push(`${header}:\n${text}`);
+      }
+      return messages.join('\n\n');
    }
 
    function sendChatHistoryToExtension() {

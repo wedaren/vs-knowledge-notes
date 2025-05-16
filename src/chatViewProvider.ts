@@ -86,6 +86,21 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                      const model = models[0];
                      const messages: vscode.LanguageModelChatMessage[] = [];
 
+                     //Add selected chat history from the webview
+                     if (data.history) {
+                        const historyBlocks = data.history.split('\n\n');
+                        historyBlocks.forEach((block: string) => {
+                           //Updated regex to handle multiline messages without the 's' flag
+                           const newFormatMatch = block.match(/^\[(.*?)\] (User|Assistant)(?:\((.*?)\))?:\s*\n([\s\S]*)$/);
+                           if (newFormatMatch) {
+                              const sender = newFormatMatch[2].toLowerCase();
+                              const text = newFormatMatch[4];
+                              const role = sender === 'user' ? vscode.LanguageModelChatMessageRole.User : vscode.LanguageModelChatMessageRole.Assistant;
+                              messages.push(new vscode.LanguageModelChatMessage(role, text));
+                           }
+                        });
+                     }
+
                      //1. Add specific instruction from the .prompt.md file (if currentPromptFileUri is set)
                      if (this.currentPromptFileUri) {
                         try {
@@ -234,6 +249,21 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             <textarea id="chat-input" class="chat-input" placeholder="Type your message..."></textarea>
             <div>
                <button id="send-button" class="send-button">Send</button>
+               <div class="history-selector-container">
+                  <select id="history-count-selector" name="history-count-selector">
+                     <option value="0">None</option>
+                     <option value="1">Last 1</option>
+                     <option value="2">Last 2</option>
+                     <option value="3">Last 3</option>
+                     <option value="4">Last 4</option>
+                     <option value="5">Last 5</option>
+                     <option value="6">Last 6</option>
+                     <option value="7">Last 7</option>
+                     <option value="8">Last 8</option>
+                     <option value="9">Last 9</option>
+                     <option value="10">Last 10</option>
+                  </select>
+               </div>
                <div class="model-selector-container">
                   <select id="model-selector" name="model-selector">
                   <option value="gpt-4o">gpt-4o</option>
