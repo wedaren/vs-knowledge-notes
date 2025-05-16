@@ -1,6 +1,6 @@
 # Change Log
 
-## [1.1.25] - $(date +'%Y-%m-%d')
+## [1.1.25] - 2025-05-16
 
 - feat: Add configurable auto-save delay and pause functionality
 - feat: 添加历史消息选择功能，增强聊天体验
