@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.1.27] - 2025-05-17
+
+- 添加 Thinker Chat Participant 功能
+- 优化 Prompt
+
 ## [1.1.26] - 2025-05-16
 
 - Revert "feat: 添加历史消息选择功能，增强聊天体验"
