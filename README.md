@@ -9,8 +9,29 @@ VSCode extension for managing your daily order.
 - Quick access to your daily order via activity bar.
 - Open markdown as preview by one action when read-only mode.
 - Add tags to your note and show tag tree view.
-- Search in your notes via command pallette.
-- Focus On Today Order Note.
+- Search in your notes via command palette, with support for case sensitivity, whole word matching, and regex.
+- Focus On Today Order Note (Shortcut: `ctrl+t` on macOS).
+- Thinker Chat Participant: Engage in a more thoughtful chat experience.
+- LLM Chat Panel: Assists in editing notes, displayed when a Markdown note is open.
+- Configurable Auto-Save:
+    - Automatic saving of Markdown files.
+    - Git auto-save with configurable intervals and manual save options.
+    - Configurable auto-save delay and pause functionality.
+    - Automatic `markdownlint` fixes on save.
+- File and Prompt Management:
+    - Create new files or `.prompt.md` files via commands.
+    - File completion triggered by `>>` or `》》`.
+    - Prompt completion with support for custom prompt directories.
+    - "Add to Today's Note" LLM tool for appending text.
+    - Today's note uses date as filename and supports templates.
+- Markdown Enhancements:
+    - Command to open links within Markdown files.
+    - Timestamp insertion via Markdown completion.
+- Git Integration:
+    - Improved handling of Git merge conflicts.
+    - Git commit queue for smoother auto-save.
+- Open notes directory in a new window.
+
 ### TBA
 - Manage revision your note by git.
 
@@ -20,22 +41,6 @@ Execute `Daily Order: Set Notes Directory` or click `Set Notes Directory` button
 # File Operations
 ![Demo](./img/file_operations.gif)
 You can operate file in notes directory by GUI, commands and keyboard shortcuts.
-## Commands
- - `Daily Order: New File`
- - `Daily Order: New Folder`
-## Keyboard Shortcuts
-| Operation        | Shortcut       |
-| ---------------- | -------------- |
-| findInFolder     | `shift+alt+f`  |
-| cut              | `ctrl+x`       |
-| copy             | `ctrl+c`       |
-| paste            | `ctrl+v`       |
-| copyPath         | `shift+alt+c`  |
-| copyRelativePath | `ctrl+shift+c` |
-| rename           | `f2`           |
-| delete           | `delete`       |
-
-Deleted files will be moved to the Trash.
 
 # Display Mode
 ![Demo](./img/display_mode.gif)
@@ -62,11 +67,6 @@ tags: [software/algorithm, math]
 ```
 Tags can be hierarchized by delimiting them with a `/`. The delimiter can be changed freely. See [Settings](#Settings).
 
-# Search
-![Demo](./img/search_demo.gif)
-You can search in notes via `Daily Order: Search In Notes` command.
-Use the button in the upper right for toggling match case, match whole word and use regex.
-![SearchCommand](./img/search_command.png)
 
 # Settings
 | Name                               | Description                                                                     | type                                |
