@@ -1,5 +1,5 @@
 //media/chat.js
-(function() {
+(function () {
    const vscode = acquireVsCodeApi();
    const chatMessages = document.getElementById('chat-messages');
    const chatContainer = document.getElementById('chat-container');
@@ -7,6 +7,9 @@
    const sendButton = document.getElementById('send-button');
    const modelSelector = document.getElementById('model-selector');
    let currentChatModelId = null;
+   let historyIndex = -1;
+   let userSentHistory = [];
+   let originalUserChatInput = ''; //Stores chatInput.value before starting history navigation
 
    function applyTheme(theme) {
       document.body.className = theme;
@@ -19,14 +22,20 @@
    }
 
    sendButton.addEventListener('click', () => {
-      const messageText = chatInput.value;
-      if (messageText.trim() !== '') {
+      const messageText = chatInput.value.trim();
+      if (messageText !== '') {
          vscode.postMessage({
             type: 'sendMessage',
             text: messageText
          });
          addMessageToUI(messageText, 'user');
+         //Add to history only if it's a new message and not a resend from history
+         if (!userSentHistory.includes(messageText)) {
+            userSentHistory.push(messageText);
+         }
          chatInput.value = '';
+         historyIndex = -1; //Reset history navigation state
+         originalUserChatInput = ''; //Clear the saved input
       }
    });
 
@@ -34,6 +43,45 @@
       if (event.key === 'Enter' && !event.shiftKey) {
          event.preventDefault();
          sendButton.click();
+      }
+   });
+
+   chatInput.addEventListener('keydown', (event) => {
+      const userMessages = [...userSentHistory]; //Use the consistently updated userSentHistory
+
+      if (event.key === 'ArrowUp') {
+         event.preventDefault();
+         if (userMessages.length === 0) {
+            return; //No history to navigate
+         }
+
+         if (historyIndex === -1) {
+            //Starting history navigation or restarting after typing/sending
+            originalUserChatInput = chatInput.value;
+            historyIndex = userMessages.length - 1; //Start with the last message
+         } else if (historyIndex > 0) {
+            //Navigate to the previous (older) message
+            historyIndex--;
+         }
+         //If historyIndex is 0, it stays at the oldest message on further ArrowUp presses
+         chatInput.value = userMessages[historyIndex];
+
+      } else if (event.key === 'ArrowDown') {
+         event.preventDefault();
+         if (userMessages.length === 0 || historyIndex === -1) {
+            //No history to navigate, or not currently in history navigation mode
+            return;
+         }
+
+         if (historyIndex < userMessages.length - 1) {
+            //Navigate to the next (newer) message
+            historyIndex++;
+            chatInput.value = userMessages[historyIndex];
+         } else if (historyIndex === userMessages.length - 1) {
+            //Was at the newest historical message, restore the original input
+            chatInput.value = originalUserChatInput;
+            historyIndex = -1; //Exit history navigation mode
+         }
       }
    });
 
@@ -72,8 +120,11 @@
                   //Pass false for shouldScroll when loading history
                   addMessageToUI(msg.text, msg.sender, msg.timestamp, null, msg.modelId);
                });
+               userSentHistory = message.history.filter(msg => msg.sender === 'user').map(msg => msg.text);
+               historyIndex = -1; //Reset history navigation state
                //After all messages are added, scroll to bottom instantly
                _instantScrollChatViewToBottom();
+
             }
             break;
          case 'themeChanged':
@@ -134,7 +185,7 @@
    function _smoothScrollChatViewToBottom() {
       requestAnimationFrame(() => {
          if (chatContainer) {
-            chatContainer.scrollTo({top: chatContainer.scrollHeight, behavior: 'smooth'});
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
          }
       });
    }
