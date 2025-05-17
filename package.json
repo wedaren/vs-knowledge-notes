@@ -213,6 +213,11 @@
             "command": "daily-order.toggleAutoSavePause",
             "title": "Daily Order: Toggle Auto-Save Pause for Notes",
             "category": "Daily Order"
+         },
+         {
+            "command": "daily-order.createNoteFromSelection",
+            "category": "Daily Order",
+            "title": "从选中文本新建笔记"
          }
       ],
       "keybindings": [
@@ -474,6 +479,13 @@
                "command": "daily-order.noteExplorer.delete",
                "when": "view == daily-order.noteExplorer",
                "group": "5_modification@2"
+            }
+         ],
+         "editor/context": [
+            {
+               "command": "daily-order.createNoteFromSelection",
+               "when": "editorLangId == markdown && editorHasSelection",
+               "group": "navigation@1"
             }
          ],
          "commandPalette": [
