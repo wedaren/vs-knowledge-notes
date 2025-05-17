@@ -47,5 +47,5 @@ feat(chat): 将聊天记录解析逻辑迁移到后端
 '''
 
 // 步骤 4: 提供 Commit 命令
-最后，请提供 `git commit -m "生成的commit message"` 命令，并用 @terminal 执行。
+@terminal 执行 `git commit -m "生成的commit message"` 命令
 
