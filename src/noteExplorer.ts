@@ -167,13 +167,98 @@ export class NoteExplorer {
 
    public async ensureTodayNoteFileExists(noteFileUri: vscode.Uri): Promise<void> {
       if (!this.fileSystemProvider.exists(noteFileUri)) {
-         const today = dayjs(path.basename(noteFileUri.fsPath, '.md')); // Extract date from filename
+         const today = dayjs(path.basename(noteFileUri.fsPath, '.md')); //Extract date from filename
          const template = `# ${today.format('YYYY-MM-DD')}\n\n`;
          try {
             await this.fileSystemProvider.writeFile(noteFileUri, Buffer.from(template), { create: true, overwrite: false });
          } catch (error) {
             vscode.window.showErrorMessage(`Failed to create note file ${noteFileUri.fsPath}: ${error}`);
          }
+      }
+   }
+
+   public async createNoteFile(
+      targetDirUri: vscode.Uri,
+      baseName: string, //Sanitized base name, without .md extension
+      content: string
+   ): Promise<vscode.Uri | null> {
+      let actualBaseName = baseName.trim();
+      if (!actualBaseName) {
+         actualBaseName = `笔记-${dayjs().format('YYYYMMDD-HHmmss')}`;
+      }
+
+      let fileName = `${actualBaseName}.md`;
+      let filePath = vscode.Uri.joinPath(targetDirUri, fileName);
+      let counter = 0;
+
+      while (this.fileSystemProvider.exists(filePath)) {
+         counter++;
+         fileName = `${actualBaseName}-${counter}.md`;
+         filePath = vscode.Uri.joinPath(targetDirUri, fileName);
+         if (counter > 100) {
+            vscode.window.showErrorMessage(`无法为 "${actualBaseName}.md" 创建唯一文件名，已尝试超过100次。`);
+            return null;
+         }
+      }
+
+      try {
+         await this.fileSystemProvider.writeFile(filePath, Buffer.from(content, 'utf8'), { create: true, overwrite: false });
+         return filePath;
+      } catch (error: any) {
+         vscode.window.showErrorMessage(`创建笔记文件失败 ${filePath.fsPath}: ${error.message || error}`);
+         console.error(`创建笔记文件失败 ${filePath.fsPath}:`, error);
+         return null;
+      }
+   }
+
+   public async createNewNote(options: { titleHint: string, initialContent?: string, targetDirUri?: vscode.Uri }): Promise<vscode.Uri | null> {
+      const notesDir = options?.targetDirUri || this.config.notesDir;
+      if (!notesDir) {
+         vscode.window.showErrorMessage('笔记目录未设置。');
+         return null;
+      }
+
+      let baseName =options.titleHint;
+
+      //确定初始内容
+      //如果提供了 initialContent，则使用它
+      //否则，根据 baseName 生成默认内容 (例如 "# <baseName>\n\n")
+      const contentToUse = options?.initialContent !== undefined
+         ? options.initialContent
+         : `# ${baseName}\n\n`;
+
+      //使用现有的 createNoteFile 方法，它处理唯一文件名生成和文件创建
+      //createNoteFile 需要一个不带 .md 扩展名的、已清理的基本名称
+      return this.createNoteFile(notesDir, baseName, contentToUse);
+   }
+
+   public async appendContentToNote(
+      noteUri: vscode.Uri,
+      contentToAppend: string,
+      options?: { ensureNewLine?: boolean }
+   ): Promise<boolean> {
+      if (!this.fileSystemProvider.exists(noteUri)) {
+         vscode.window.showErrorMessage(`笔记文件不存在: ${noteUri.fsPath}`);
+         return false;
+      }
+
+      try {
+         const existingContentBytes = await this.fileSystemProvider.readFile(noteUri);
+         let existingContent = Buffer.from(existingContentBytes).toString('utf8');
+
+         if (options?.ensureNewLine) {
+            if (existingContent.length > 0 && !existingContent.endsWith('\n')) {
+               existingContent += '\n';
+            }
+         }
+
+         const newContent = existingContent + contentToAppend;
+         await this.fileSystemProvider.writeFile(noteUri, Buffer.from(newContent, 'utf8'), { create: false, overwrite: true });
+         return true;
+      } catch (error: any) {
+         vscode.window.showErrorMessage(`向笔记文件追加内容失败 ${noteUri.fsPath}: ${error.message || error}`);
+         console.error(`向笔记文件追加内容失败 ${noteUri.fsPath}:`, error);
+         return false;
       }
    }
 
@@ -191,6 +276,7 @@ export class NoteExplorer {
          vscode.commands.registerCommand('daily-order.noteExplorer.newPrompt', (file?: File) => this.createNewPromptOfFile(file)),
          //TODO:这个命令应该属于 FileSystemProvider
          vscode.commands.registerCommand('daily-order.noteExplorer.createFile', (uri?: vscode.Uri) => this.createNewFileByName(uri)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.newNote', (options: { titleHint: string, initialContent?: string, targetDirUri?: vscode.Uri }) => this.createNewNote(options)), //修改以接受参数
          vscode.commands.registerCommand('daily-order.noteExplorer.newFolder', (file?: File) => this.createNewFolder(file)),
          //TODO:这个命令应该属于 FileSystemProvider
          vscode.commands.registerCommand('daily-order.noteExplorer.createFolder', (uri?: vscode.Uri) => this.createNewFolderByName(uri)),
@@ -204,7 +290,7 @@ export class NoteExplorer {
          vscode.commands.registerCommand('daily-order.noteExplorer.copyRelativePath', (file?: File) => this.copyRelativePath(file)),
          vscode.commands.registerCommand('daily-order.noteExplorer.rename', (file?: File) => this.rename(file)),
          vscode.commands.registerCommand('daily-order.noteExplorer.delete', (file?: File) => this.delete(file)),
-         vscode.commands.registerCommand('daily-order.noteExplorer.reveal', async(uri: vscode.Uri) => this.revealFile(uri)),
+         vscode.commands.registerCommand('daily-order.noteExplorer.reveal', async (uri: vscode.Uri) => this.revealFile(uri)),
          vscode.commands.registerCommand('daily-order.noteExplorer.focusOnTodayOrderNote', () => this.focusOnTodayOrderNote()),
       ];
    }
@@ -213,7 +299,7 @@ export class NoteExplorer {
       await this.reveal(uri);
       this.openFile(uri);
    }
-   async reveal(uri?: vscode.Uri): Promise<void>{
+   async reveal(uri?: vscode.Uri): Promise<void> {
       if (!uri) return;
       await this.treeView.reveal(new File(uri, vscode.FileType.File), { select: true, focus: true });
    }
@@ -287,10 +373,10 @@ export class NoteExplorer {
       if (!this.config.notesDir) return;
       if (!file && !this.treeView.selection.length) return;
       const selectedFile: File = file ? file : this.treeView.selection.length ? this.treeView.selection[0] : new File(this.config.notesDir, vscode.FileType.Directory);
-      if(selectedFile.uri.fsPath.endsWith('.prompt.md')) return;
+      if (selectedFile.uri.fsPath.endsWith('.prompt.md')) return;
       if (selectedFile.uri.fsPath.endsWith('.chatlog.md')) return;
       const newFilePath = selectedFile.uri.fsPath.replace('.md', '.prompt.md');
-      if (this.fileSystemProvider.exists(vscode.Uri.file(newFilePath)))return;
+      if (this.fileSystemProvider.exists(vscode.Uri.file(newFilePath))) return;
       const filename = vscode.Uri.file(newFilePath);
       this.fileSystemProvider.writeFile(filename, new Uint8Array(), { create: true, overwrite: false });
 
@@ -310,19 +396,19 @@ export class NoteExplorer {
    }
    private async createNewFolderByName(dirUri?: vscode.Uri): Promise<void> {
       if (!this.config.notesDir) return;
-      if(!dirUri) return;
+      if (!dirUri) return;
       this.fileSystemProvider.createDirectory(dirUri);
    }
    private async createNewFileByName(file?: vscode.Uri): Promise<void> {
       if (!this.config.notesDir) return;
-      if(!file) return;
+      if (!file) return;
 
       //检查文件是否存在
-      if (! this.fileSystemProvider.exists(file)) {
+      if (!this.fileSystemProvider.exists(file)) {
          //创建文件
          try {
             const dirUri = vscode.Uri.file(path.dirname(file.fsPath));
-            if (! this.fileSystemProvider.exists(dirUri)) {
+            if (!this.fileSystemProvider.exists(dirUri)) {
                await this.fileSystemProvider.createDirectory(dirUri);
             }
             const fileName = path.basename(file.fsPath, '.md');
