@@ -50,7 +50,6 @@
             appendMessageText(message.textPart, message.messageId);
             break;
          case 'streamMessageEnd':
-            sendChatHistoryToExtension();
             break;
          case 'updateSelectedModelInWebview':
             currentChatModelId = message.modelId;
@@ -60,7 +59,7 @@
                   modelSelector.value = message.modelId;
                }
             } else if (modelSelector && !message.modelId) {
-               // modelSelector.value = modelSelector.options[0].value;
+               //modelSelector.value = modelSelector.options[0].value;
             }
             break;
          case 'loadParsedHistory':
@@ -75,7 +74,7 @@
             applyTheme(message.theme);
             break;
          case 'availableModels':
-            // populateModelSelector(message.models);
+            //populateModelSelector(message.models);
             break;
       }
    });
@@ -132,26 +131,6 @@
             });
          }
       }
-   }
-
-   function sendChatHistoryToExtension() {
-      const messages = [];
-      chatMessages.querySelectorAll('.message').forEach(messageElement => {
-         const sender = messageElement.classList.contains('user-message') ? 'User' : 'Assistant';
-         const text = messageElement.querySelector('pre').textContent;
-         const timestamp = messageElement.dataset.timestamp;
-
-         let header = `[${timestamp}] ${sender}`;
-         if (sender === 'Assistant') {
-            const modelId = messageElement.dataset.modelId;
-            if (modelId) {
-               header += `(${modelId})`;
-            }
-         }
-         messages.push(`${header}:\n${text}`);
-      });
-      const historyText = messages.join('\n\n');
-      vscode.postMessage({ type: 'saveChatHistory', history: historyText });
    }
 
    vscode.postMessage({ type: 'webviewReady' });

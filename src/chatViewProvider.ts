@@ -3,30 +3,34 @@ import { Buffer } from 'buffer';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
 
-   private _view?: vscode.WebviewView;
-   private currentChatlogFileUri?: vscode.Uri;
-   private webviewReady: boolean = false;
-   private selectedModelId?: string;
-   private currentMarkdownFileUri?: vscode.Uri;
-   private currentPromptFileUri?: vscode.Uri;
+   private _view?: vscode.WebviewView; //Webview 视图实例
+   private currentChatlogFileUri?: vscode.Uri; //当前聊天记录文件的 URI
+   private webviewReady: boolean = false; //Webview 是否准备就绪
+   private selectedModelId?: string; //当前选中的语言模型 ID
+   private currentMarkdownFileUri?: vscode.Uri; //当前 Markdown 文件的 URI
+   private currentPromptFileUri?: vscode.Uri; //当前 Prompt 文件的 URI
+   private static readonly MAX_CHAT_HISTORY_MESSAGES = 10; //定义聊天记录显示的最大数量
 
    constructor(private readonly _extensionUri: vscode.Uri) { }
 
+   //解析聊天记录字符串
    private parseChatHistory(historyString: string): Array<{ text: string; sender: 'user' | 'assistant'; timestamp?: string; modelId?: string }> {
       const messages: Array<{ text: string; sender: 'user' | 'assistant'; timestamp?: string; modelId?: string }> = [];
       if (!historyString) {
          return messages;
       }
 
+      //使用正则表达式分割聊天记录块
       const historyBlocks = historyString.split(/\n\n(?=\[.*?\] (?:User|Assistant(?:\(.*?\))?):)/);
       historyBlocks.forEach(block => {
          if (block.trim() !== '') {
+            //匹配新的聊天记录格式 (带时间戳和模型ID)
             const newFormatMatch = block.match(/^\[(.*?)\] (User|Assistant)(?:\((.*?)\))?:\s*\n([\s\S]*)$/);
             if (newFormatMatch) {
-               const timestamp = newFormatMatch[1];
-               const sender = newFormatMatch[2].toLowerCase() as 'user' | 'assistant';
-               const modelId = newFormatMatch[3];
-               const text = newFormatMatch[4];
+               const timestamp = newFormatMatch[1]; //提取时间戳
+               const sender = newFormatMatch[2].toLowerCase() as 'user' | 'assistant'; //提取发送者并转换为小写
+               const modelId = newFormatMatch[3]; //提取模型 ID
+               const text = newFormatMatch[4]; //提取消息内容
                messages.push({ text, sender, timestamp, modelId });
             } else {
                const userMatch = block.match(/^User:\s*([\s\S]*)/);
@@ -44,7 +48,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
             }
          }
       });
-      return messages;
+      //返回仅包含最后 MAX_CHAT_HISTORY_MESSAGES 条消息的记录
+      return messages.slice(-ChatViewProvider.MAX_CHAT_HISTORY_MESSAGES);
    }
 
    private async updateChatHistory(): Promise<void> {
@@ -132,10 +137,47 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                      const messageId = `msg-${Date.now()}`;
                      this.sendMessageToWebview({ type: 'newStreamMessage', text: '', messageId: messageId, sender: 'assistant' });
 
+                     let fullAssistantResponse = ''; //新增: 用于累积助手的完整响应
                      for await (const textPart of chatResponse.text) {
                         this.sendMessageToWebview({ type: 'streamMessagePart', textPart: textPart, messageId: messageId });
+                        fullAssistantResponse += textPart; //新增: 累积响应片段
                      }
                      this.sendMessageToWebview({ type: 'streamMessageEnd', messageId: messageId });
+
+                     //--- 新增：保存聊天记录的逻辑 ---
+                     if (this.currentChatlogFileUri) {
+                        const userMessageContent = data.text; //用户发送的原始消息
+                        const actualModelId = model.id; //实际使用的模型ID
+                        const turnTimestamp = new Date().toLocaleString(); //当前交互的时间戳
+
+                        const userEntry = `[${turnTimestamp}] User:\n${userMessageContent}`;
+                        const assistantEntry = `[${turnTimestamp}] Assistant(${actualModelId}):\n${fullAssistantResponse}`;
+
+                        try {
+                           let existingContentBytes: Uint8Array;
+                           try {
+                              existingContentBytes = await vscode.workspace.fs.readFile(this.currentChatlogFileUri);
+                           } catch (e) {
+                              //如果文件不存在，则以空内容开始
+                              existingContentBytes = new Uint8Array();
+                           }
+                           const existingContent = Buffer.from(existingContentBytes).toString('utf-8');
+
+                           let contentToAppend = userEntry + '\n\n' + assistantEntry;
+                           //如果已有内容，则在追加前添加换行符
+                           if (existingContent.trim() !== '') {
+                              contentToAppend = '\n\n' + contentToAppend;
+                           }
+
+                           const newFileContent = existingContent + contentToAppend;
+                           await vscode.workspace.fs.writeFile(this.currentChatlogFileUri, Buffer.from(newFileContent, 'utf8'));
+
+                        } catch (saveError: any) {
+                           console.error(`Failed to save chat history to ${this.currentChatlogFileUri.fsPath}:`, saveError);
+                           vscode.window.showErrorMessage('Failed to automatically save chat history.');
+                        }
+                     }
+                     //--- 保存聊天记录的逻辑结束 ---
 
                   } else {
                      this.sendMessageToWebview({ type: 'newMessage', text: 'Model selection was cancelled or no suitable model is available for the selection.' });
@@ -156,16 +198,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                      }
                   }
                   this.sendMessageToWebview({ type: 'newMessage', text: errorMessage });
-               }
-               break;
-            case 'saveChatHistory':
-               if (this.currentChatlogFileUri && data.history) {
-                  try {
-                     await vscode.workspace.fs.writeFile(this.currentChatlogFileUri, Buffer.from(data.history, 'utf8'));
-                  } catch (error: any) {
-                     console.error('Failed to save chat history:', error);
-                     vscode.window.showErrorMessage('Failed to save chat history.');
-                  }
                }
                break;
          }
