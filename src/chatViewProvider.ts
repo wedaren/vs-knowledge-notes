@@ -1,36 +1,66 @@
 import * as vscode from 'vscode';
-import { Buffer } from 'buffer'; //Ensure Buffer is imported
+import { Buffer } from 'buffer';
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
 
    private _view?: vscode.WebviewView;
-   private currentChatlogFileUri?: vscode.Uri; //Renamed from activeChatlogUri
+   private currentChatlogFileUri?: vscode.Uri;
    private webviewReady: boolean = false;
    private selectedModelId?: string;
-   private currentMarkdownFileUri?: vscode.Uri; //Stores the URI of the currently active main Markdown file
-   private currentPromptFileUri?: vscode.Uri; //Stores the URI of the .prompt.md file associated with the currentMarkdownFileUri
+   private currentMarkdownFileUri?: vscode.Uri;
+   private currentPromptFileUri?: vscode.Uri;
 
    constructor(private readonly _extensionUri: vscode.Uri) { }
 
-   private async updateChatHistory(): Promise<void> {
-      //Attempt to load from currentChatlogFileUri
-      if (this.currentChatlogFileUri) {
-         //Only attempt to load if the webview is ready and visible.
-         if (this._view && this._view.visible && this.webviewReady) {
-            try {
-               const chatlogContentBytes = await vscode.workspace.fs.readFile(this.currentChatlogFileUri);
-               const loadedHistory = Buffer.from(chatlogContentBytes).toString('utf-8');
-               this.sendMessageToWebview({ type: 'loadHistory', history: loadedHistory });
-            } catch (err: any) {
-               console.warn(`Failed to read chatlog ${this.currentChatlogFileUri?.fsPath} in updateChatHistory:`, err);
-               this.sendMessageToWebview({ type: 'loadHistory', history: '' }); //Load empty on error
+   private parseChatHistory(historyString: string): Array<{ text: string; sender: 'user' | 'assistant'; timestamp?: string; modelId?: string }> {
+      const messages: Array<{ text: string; sender: 'user' | 'assistant'; timestamp?: string; modelId?: string }> = [];
+      if (!historyString) {
+         return messages;
+      }
+
+      const historyBlocks = historyString.split(/\n\n(?=\[.*?\] (?:User|Assistant(?:\(.*?\))?):)/);
+      historyBlocks.forEach(block => {
+         if (block.trim() !== '') {
+            const newFormatMatch = block.match(/^\[(.*?)\] (User|Assistant)(?:\((.*?)\))?:\s*\n([\s\S]*)$/);
+            if (newFormatMatch) {
+               const timestamp = newFormatMatch[1];
+               const sender = newFormatMatch[2].toLowerCase() as 'user' | 'assistant';
+               const modelId = newFormatMatch[3];
+               const text = newFormatMatch[4];
+               messages.push({ text, sender, timestamp, modelId });
+            } else {
+               const userMatch = block.match(/^User:\s*([\s\S]*)/);
+               const assistantMatch = block.match(/^Assistant:\s*([\s\S]*)/);
+               if (userMatch && userMatch[1] !== undefined) {
+                  messages.push({ text: userMatch[1].trim(), sender: 'user' });
+               } else if (assistantMatch && assistantMatch[1] !== undefined) {
+                  messages.push({ text: assistantMatch[1].trim(), sender: 'assistant' });
+               } else {
+                  console.warn('Could not parse chat history block in backend:', block);
+                  if (block.trim()) {
+                     messages.push({ text: block.trim(), sender: 'assistant' });
+                  }
+               }
             }
          }
-         //If not ready/visible, do nothing here. The respective event handlers will call updateChatHistory().
-      } else {
-         //No currentChatlogFileUri. If webview is ready and visible, clear its history.
-         if (this._view && this._view.visible && this.webviewReady) {
-            this.sendMessageToWebview({ type: 'loadHistory', history: '' });
+      });
+      return messages;
+   }
+
+   private async updateChatHistory(): Promise<void> {
+      if (this._view && this._view.visible && this.webviewReady) {
+         if (this.currentChatlogFileUri) {
+            try {
+               const chatlogContentBytes = await vscode.workspace.fs.readFile(this.currentChatlogFileUri);
+               const loadedHistoryString = Buffer.from(chatlogContentBytes).toString('utf-8');
+               const parsedHistory = this.parseChatHistory(loadedHistoryString);
+               this.sendMessageToWebview({ type: 'loadParsedHistory', history: parsedHistory });
+            } catch (err: any) {
+               console.warn(`Failed to read chatlog ${this.currentChatlogFileUri?.fsPath} in updateChatHistory:`, err);
+               this.sendMessageToWebview({ type: 'loadParsedHistory', history: [] });
+            }
+         } else {
+            this.sendMessageToWebview({ type: 'loadParsedHistory', history: [] });
          }
       }
    }
@@ -50,7 +80,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
       webviewView.onDidChangeVisibility(() => {
          if (webviewView.visible && this.webviewReady) {
-            //If the view becomes visible and is ready, ensure chat history is up-to-date.
             this.updateChatHistory();
          }
       });
@@ -59,12 +88,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
          switch (data.type) {
             case 'webviewReady':
                this.webviewReady = true;
-               //Webview is ready, try to load/update history.
                this.updateChatHistory();
                break;
             case 'setSelectedModel':
                this.selectedModelId = data.modelId;
-               //Notify webview about the model change
                if (this.webviewReady && this._view) {
                   this.sendMessageToWebview({ type: 'updateSelectedModelInWebview', modelId: this.selectedModelId });
                }
@@ -76,17 +103,16 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                }
 
                try {
-                  let modelFilter: vscode.LanguageModelChatSelector = { vendor: 'copilot', family: 'gpt-4o' };
+                  let defalutModelSelector: vscode.LanguageModelChatSelector = { vendor: 'copilot', family: 'gpt-4o' };
                   if (this.selectedModelId) {
-                     modelFilter = { id: this.selectedModelId };
+                     defalutModelSelector = { id: this.selectedModelId };
                   }
 
-                  const models = await vscode.lm.selectChatModels(modelFilter);
+                  const models = await vscode.lm.selectChatModels(defalutModelSelector);
                   if (models && models.length > 0) {
                      const model = models[0];
                      const messages: vscode.LanguageModelChatMessage[] = [];
 
-                     //1. Add specific instruction from the .prompt.md file (if currentPromptFileUri is set)
                      if (this.currentPromptFileUri) {
                         try {
                            const promptContentBytes = await vscode.workspace.fs.readFile(this.currentPromptFileUri);
@@ -96,29 +122,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                            }
                         } catch (err: any) {
                            console.error(`Failed to read prompt context from ${this.currentPromptFileUri.fsPath}:`, err);
-                           //Optionally, notify the user or handle silently
                         }
                      }
 
-                     ////2. Add general "intelligent note-taking assistant" prompt.
-                     //messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, '你是一个智能笔记助手，请根据用户提供的笔记内容和上下文，提供有条理、清晰的回答和建议。'));
-
-                     ////3. Add content from the active Markdown note (if currentMarkdownFileUri is set)
-                     //if (this.currentMarkdownFileUri) {
-                     //try {
-                     //const noteContentBytes = await vscode.workspace.fs.readFile(this.currentMarkdownFileUri);
-                     //const noteContent = Buffer.from(noteContentBytes).toString('utf-8');
-                     //if (noteContent.trim()) {
-                     //messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, `这是当前打开的 Markdown 笔记的相关内容：\n${noteContent}`));
-                     //}
-                     //} catch (err: any) {
-                     //console.error(`Failed to read note context from ${this.currentMarkdownFileUri.fsPath}:`, err);
-                     ////Not adding a user-facing error message here to keep the chat flow clean,
-                     ////but logging is important.
-                     //}
-                     //}
-
-                     //4. Add user's current message (data.text).
                      messages.push(new vscode.LanguageModelChatMessage(vscode.LanguageModelChatMessageRole.User, data.text));
 
                      const chatResponse = await model.sendRequest(messages, {}, new vscode.CancellationTokenSource().token);
@@ -170,9 +176,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       if (this._view && this.webviewReady) {
          this._view.webview.postMessage(message);
       }
-      //Messages sent when webview is not ready are generally dropped.
-      //updateChatHistory handles its own readiness checks for sending history.
-      //Model availability is explicitly sent when webviewReady becomes true (handled in 'webviewReady' case).
    }
 
    public async setReadlyPanel(editor: vscode.TextEditor): Promise<void> {
@@ -180,7 +183,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       const filePath = editor.document.fileName;
       const fileUri = editor.document.uri;
 
-      //If a chatlog or prompt file is opened directly, clear all context and return.
       if (filePath.endsWith('.chatlog.md') || filePath.endsWith('.prompt.md')) {
          this.currentMarkdownFileUri = undefined;
          this.currentPromptFileUri = undefined;
@@ -189,10 +191,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
          return;
       }
 
-      //This is a main .md file
       this.currentMarkdownFileUri = fileUri;
 
-      //Set associated prompt file URI
       const promptFilePath = filePath.replace(/\.md$/, '.prompt.md');
       try {
          this.currentPromptFileUri = vscode.Uri.file(promptFilePath);
@@ -201,10 +201,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
          this.currentPromptFileUri = undefined;
       }
 
-      //Set and load associated chatlog file
       const chatlogFilePath = filePath.replace(/\.md$/, '.chatlog.md');
       this.currentChatlogFileUri = vscode.Uri.file(chatlogFilePath);
-      this.updateChatHistory(); //Call updateChatHistory after currentChatlogFileUri is set
+      this.updateChatHistory();
    }
 
    private _getHtmlForWebview(webview: vscode.Webview): string {
