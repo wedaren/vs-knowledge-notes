@@ -44,7 +44,10 @@
             addMessageToUI(message.text, 'assistant');
             break;
          case 'newStreamMessage':
-            addMessageToUI('', message.sender || 'assistant', new Date().toLocaleString(), message.messageId);
+            //For new stream messages, add the UI element but don't scroll yet.
+            //Scrolling will be handled by appendMessageText based on user's scroll position.
+            //explicitModelId is the 5th param, shouldScroll is the 6th.
+            addMessageToUI('', message.sender || 'assistant', new Date().toLocaleString(), message.messageId, undefined);
             break;
          case 'streamMessagePart':
             appendMessageText(message.textPart, message.messageId);
@@ -66,8 +69,11 @@
             chatMessages.innerHTML = '';
             if (message.history && Array.isArray(message.history)) {
                message.history.forEach(msg => {
+                  //Pass false for shouldScroll when loading history
                   addMessageToUI(msg.text, msg.sender, msg.timestamp, null, msg.modelId);
                });
+               //After all messages are added, scroll to bottom instantly
+               _instantScrollChatViewToBottom();
             }
             break;
          case 'themeChanged':
@@ -89,7 +95,15 @@
       });
    }
 
-   function addMessageToUI(text, sender, timestamp, messageId, explicitModelId) {
+   function _instantScrollChatViewToBottom() {
+      requestAnimationFrame(() => {
+         if (chatContainer) {
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'auto' });
+         }
+      });
+   }
+
+   function addMessageToUI(text, sender, timestamp, messageId, explicitModelId, shouldScroll = true) {
       const messageElement = document.createElement('div');
       messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'assistant-message');
       if (messageId) {
@@ -111,6 +125,13 @@
       messageElement.appendChild(preElement);
 
       chatMessages.appendChild(messageElement);
+
+      if (shouldScroll) {
+         _smoothScrollChatViewToBottom();
+      }
+   }
+
+   function _smoothScrollChatViewToBottom() {
       requestAnimationFrame(() => {
          if (chatContainer) {
             chatContainer.scrollTo({top: chatContainer.scrollHeight, behavior: 'smooth'});
@@ -118,17 +139,24 @@
       });
    }
 
+   function _conditionallyScrollChatViewToBottom() {
+      //Threshold in pixels from the bottom. If the user is scrolled up further than this, don't auto-scroll.
+      const SCROLL_THRESHOLD = 40;
+      const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < SCROLL_THRESHOLD;
+
+      //Only scroll if user was already near the bottom before text was appended
+      if (isNearBottom) {
+         _smoothScrollChatViewToBottom();
+      }
+   }
+
    function appendMessageText(textPart, messageId) {
       const messageElement = chatMessages.querySelector(`.message[data-message-id="${messageId}"]`);
       if (messageElement) {
          const preElement = messageElement.querySelector('pre');
          if (preElement) {
-            preElement.textContent += textPart;
-            requestAnimationFrame(() => {
-               if (chatContainer) {
-                  chatContainer.scrollTo({top: chatContainer.scrollHeight, behavior: 'smooth'});
-               }
-            });
+            preElement.textContent += textPart; //Append text
+            _conditionallyScrollChatViewToBottom(); //Call the extracted helper function
          }
       }
    }
