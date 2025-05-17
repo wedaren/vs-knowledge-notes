@@ -23,35 +23,7 @@
       "@typescript-eslint/semi": "warn",
       "eqeqeq": "warn",
       "no-throw-literal": "warn",
-      "eol-last": [
-         "warn",
-         "always"
-      ],
-      "indent": [
-         "warn",
-         3,
-         {
-            "SwitchCase": 1
-         }
-      ],
-      "multiline-comment-style": [
-         "warn",
-         "separate-lines"
-      ],
-      "block-spacing": [
-         "warn",
-         "always"
-      ],
       "no-array-constructor": "warn",
-      "no-trailing-spaces": "warn",
-      "quotes": [
-         "warn",
-         "single"
-      ],
-      "spaced-comment": [
-         "warn",
-         "never"
-      ],
       "semi": "off"
    },
    "ignorePatterns": [

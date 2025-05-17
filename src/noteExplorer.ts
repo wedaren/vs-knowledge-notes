@@ -218,7 +218,7 @@ export class NoteExplorer {
          return null;
       }
 
-      let baseName =options.titleHint;
+      let baseName = options.titleHint;
 
       //确定初始内容
       //如果提供了 initialContent，则使用它
