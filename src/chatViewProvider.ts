@@ -70,7 +70,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       }
    }
 
-   public resolveWebviewView(
+   public async resolveWebviewView( // Add async here
       webviewView: vscode.WebviewView,
       context: vscode.WebviewViewResolveContext,
       _token: vscode.CancellationToken,
@@ -78,10 +78,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       this._view = webviewView;
       webviewView.webview.options = {
          enableScripts: true,
-         localResourceRoots: [this._extensionUri],
+         localResourceRoots: [
+            this._extensionUri,
+            vscode.Uri.joinPath(this._extensionUri, 'dist', 'media'), // 允许从 dist/media 加载
+            vscode.Uri.joinPath(this._extensionUri, 'media') // 如果仍然直接引用 media 中的 css 等
+         ],
       };
 
-      webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+      webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview); // Add await here
 
       webviewView.onDidChangeVisibility(() => {
          if (webviewView.visible && this.webviewReady) {
@@ -238,48 +242,32 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       this.updateChatHistory();
    }
 
-   private _getHtmlForWebview(webview: vscode.Webview): string {
-      const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'chat.js'));
+   private async _getHtmlForWebview(webview: vscode.Webview): Promise<string> {
+      const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'dist', 'media', 'chat.js')); // 指向编译后的 JS 文件
       const stylesResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'));
       const stylesMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'));
       const chatStylesUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'chat.css'));
+      const toolkitUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode', 'webview-ui-toolkit', 'dist', 'toolkit.js'));
       const nonce = getNonce();
 
-      return `<!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      // 从 media/chat.html 读取 HTML 内容
+      const htmlPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'chat.html');
+      const htmlContentBytes = await vscode.workspace.fs.readFile(htmlPath);
+      let htmlContent = Buffer.from(htmlContentBytes).toString('utf-8');
+
+      // 替换占位符
+      htmlContent = htmlContent.replace('<!--CSP_SOURCE_PLACEHOLDER-->', `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}' ${webview.cspSource}; font-src ${webview.cspSource};">`);
+      htmlContent = htmlContent.replace('<!--STYLES_PLACEHOLDER-->', `
         <link href="${stylesResetUri}" rel="stylesheet">
         <link href="${stylesMainUri}" rel="stylesheet">
         <link href="${chatStylesUri}" rel="stylesheet">
-        <title>LLM Chat</title>
-      </head>
-      <body>
-        <div id="chat-container" class="chat-container">
-          <div id="chat-messages" class="chat-messages"></div>
-        </div>
-        <div class="chat-input-area">
-          <div class="chat-input-controls">
-            <textarea id="chat-input" class="chat-input" placeholder="Type your message..."></textarea>
-            <div>
-               <button id="send-button" class="send-button">Send</button>
-               <div class="model-selector-container">
-                  <select id="model-selector" name="model-selector">
-                  <option value="gpt-4o">gpt-4o</option>
-                  <option value="gpt-4o-mini">gpt-4o-mini</option>
-                  <option value="o1">o1</option>
-                  <option value="o1-mini">o1-mini</option>
-                  <option value="claude-3.5-sonnet">claude-3.5-sonnet</option>
-                  </select>
-               </div>
-            </div>
-          </div>
-        </div>
-        <script nonce="${nonce}" src="${scriptUri}"></script>
-      </body>
-      </html>`;
+      `);
+      htmlContent = htmlContent.replace('<!--SCRIPT_PLACEHOLDER-->', `
+        <script type="module" nonce="${nonce}" src="${toolkitUri}"></script>
+        <script type="module" nonce="${nonce}" src="${scriptUri}"></script> 
+      `);
+
+      return htmlContent;
    }
 }
 

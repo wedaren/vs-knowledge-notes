@@ -6,23 +6,21 @@ const path = require('path');
 const copyPlugin = require("copy-webpack-plugin");
 
 /**@type {import('webpack').Configuration}*/
-const config = {
-   target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
-   mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
-
-   entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+const extensionConfig = {
+   name: 'extension', // 给配置命名
+   target: 'node',
+   mode: 'none',
+   entry: './src/extension.ts',
    output: {
-      // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
       path: path.resolve(__dirname, 'dist'),
       filename: 'extension.js',
       libraryTarget: 'commonjs2'
    },
    devtool: 'nosources-source-map',
    externals: {
-      vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+      vscode: 'commonjs vscode'
    },
    resolve: {
-      // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
       extensions: ['.ts', '.js']
    },
    module: {
@@ -39,7 +37,6 @@ const config = {
       ]
    },
    plugins: [
-      //copy executable files to dist for trash library.
       new copyPlugin({
          patterns: [
             {
@@ -53,4 +50,36 @@ const config = {
       })
    ]
 };
-module.exports = config;
+
+/**@type {import('webpack').Configuration}*/
+const webviewConfig = {
+   name: 'webview', // 给配置命名
+   target: 'web', // 目标环境为 web
+   mode: 'none',
+   entry: { // 为 webview 创建单独的入口
+      chat: './media/chat.ts'
+   },
+   output: {
+      path: path.resolve(__dirname, 'dist', 'media'), // 输出到 dist/media 文件夹
+      filename: '[name].js' // 输出 chat.js
+   },
+   devtool: 'nosources-source-map',
+   resolve: {
+      extensions: ['.ts', '.js']
+   },
+   module: {
+      rules: [
+         {
+            test: /\.ts$/,
+            exclude: /node_modules/,
+            use: [
+               {
+                  loader: 'ts-loader'
+               }
+            ]
+         }
+      ]
+   }
+};
+
+module.exports = [extensionConfig, webviewConfig]; // 导出配置数组

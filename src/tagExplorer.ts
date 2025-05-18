@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as matter from 'gray-matter';
+import matter from 'gray-matter';
 import { ripGrep as rg, RipGrepError } from './ripgrep';
 import { Config } from './config';
 import { File, FileSystemProvider } from './fileSystemProvider';

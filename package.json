@@ -643,10 +643,12 @@
    },
    "dependencies": {
       "@vscode/ripgrep": "^1.15.11",
+      "@vscode/webview-ui-toolkit": "^1.4.0",
       "dayjs": "^1.11.13",
       "escape-string-regexp": "^5.0.0",
       "fs-extra": "^9.1.0",
       "gray-matter": "^4.0.3",
+      "lit": "^3.3.0",
       "trash": "^8.1.1"
    }
 }
