@@ -1,5 +1,20 @@
 # Change Log
 
+## [1.1.28] - 2025-05-18
+
+- 使用 LitElement 和 TypeScript 重构聊天界面
+- 调整格式化策略以优化 LLM 生成代码的集成
+- 优化 review.prompt.md 中步骤4的措辞
+- 实现聊天输入框历史记录导航功能
+- 优化聊天视图滚动逻辑
+- 优化 review.prompt.md 以生成更详细的 commit message
+- 后端处理聊天记录保存与解析优化
+- 更新 review prompt with detailed instructions
+- 实现从选中文本创建笔记的核心功能
+- 增强 MarkdownLinkHandler 和 NoteExplorer
+- 添加 review prompt for code changes
+- 将聊天记录解析逻辑迁移到后端
+
 ## [1.1.27] - 2025-05-17
 
 - 添加 Thinker Chat Participant 功能
