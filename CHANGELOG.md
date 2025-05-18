@@ -1,5 +1,12 @@
 # Change Log
 
+## [1.1.30] - 2025-05-18
+
+- 完善 review.prompt 对 commit message特殊字符处理的指导
+- 使用 global.setTimeout 解决类型冲突
+- 优化 GitService 错误处理和日志记录
+- 考虑为 console.log 引入一个基于配置的调试开关
+
 ## [1.1.28] - 2025-05-18
 
 - 使用 LitElement 和 TypeScript 重构聊天界面
