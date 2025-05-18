@@ -126,12 +126,21 @@ export class Config {
    }
 
    get autoSaveDelay(): number {
-      return this.workspaceConfig.get('autoSaveDelay') ?? 6666; // Default to 1500ms
+      return this.workspaceConfig.get('autoSaveDelay') ?? 6666; // Default to 6666ms
    }
 
    set autoSaveDelay(delay: number) {
       this.workspaceConfig.update('autoSaveDelay', delay, vscode.ConfigurationTarget.Global);
       this._onDidChangeConfig.fire([Config.ConfigItem.AutoSaveDelay]);
+   }
+
+   get enableDebugLogging(): boolean {
+      return this.workspaceConfig.get('enableDebugLogging') ?? false;
+   }
+
+   set enableDebugLogging(enable: boolean) {
+      this.workspaceConfig.update('enableDebugLogging', enable, vscode.ConfigurationTarget.Global);
+      this._onDidChangeConfig.fire([Config.ConfigItem.EnableDebugLogging]);
    }
 
    //#endregion
@@ -187,7 +196,8 @@ export namespace Config {
       GitAutoSaveInterval: 'gitAutoSaveInterval',
       PromptsDir: 'promptsDir',
       MarkdownlintFixAllOnSave: 'markdownlintFixAllOnSave',
-      AutoSaveDelay: 'autoSaveDelay' // Added new config item
+      AutoSaveDelay: 'autoSaveDelay',
+      EnableDebugLogging: 'enableDebugLogging'
    } as const;
    export const PreviewEngine = {
       Default: 'default',

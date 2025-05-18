@@ -19,8 +19,12 @@ import { SearchInputViewProvider } from './searchInputViewProvider';
 import { AddNoteTool } from './languageModelTools';
 import { thinkerHandler } from './thinkerChatParticipant';
 import { createNoteFromSelection } from './createNoteFromSelection';
+import { Logger } from './logger'; // 导入 Logger
 
 export async function activate(context: vscode.ExtensionContext) {
+   const config = Config.getInstance(); // 获取 Config 实例
+   Logger.initialize(context, config); // 初始化 Logger
+
    const fileSystemProvider = new FileSystemProvider();
    const watcher = Watcher.getInstance();
    watcher.watch(fileSystemProvider);

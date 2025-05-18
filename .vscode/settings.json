@@ -12,5 +12,7 @@
    },
    "editor.defaultFormatter": "vscode.typescript-language-features",
    "editor.formatOnSave": true,
-   "files.autoSave": "afterDelay"
+   "files.autoSave": "afterDelay",
+   "daily-order.gitAutoSave": true,
+   "daily-order.autoSaveDelay": 66666
 }

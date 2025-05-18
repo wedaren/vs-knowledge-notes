@@ -595,12 +595,17 @@
             "daily-order.markdownlintFixAllOnSave": {
                "type": "boolean",
                "default": true,
-               "description": "Controls whether to run markdownlint --fix on save."
+               "description": "在保存时自动运行 Markdownlint 的 --fix-all 命令。这适用于插件自身的自动保存、用户手动保存以及 VS Code 的 files.autoSave 触发的保存。"
+            },
+            "daily-order.enableDebugLogging": {
+               "type": "boolean",
+               "default": false,
+               "description": "启用或禁用插件的详细调试日志输出。"
             },
             "daily-order.autoSaveDelay": {
                "type": "number",
                "default": 6666,
-               "description": "Delay in milliseconds after the last text change before auto-saving a note. (Default: 6666ms)"
+               "description": "文本更改后，此扩展的自动保存功能的延迟（毫秒）。如果 'daily-order.markdownlintFixAllOnSave' 为 true，则也用作在 VS Code 内置 'files.autoSave' 事件触发保存后进行 linting 的延迟。（默认值：6666 毫秒）。"
             }
          }
       }
