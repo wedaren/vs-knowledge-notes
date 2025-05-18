@@ -100,7 +100,7 @@ export class AutoSaveManager {
                   if (this.lintAfterVSCodeSaveTimeout) {
                      clearTimeout(this.lintAfterVSCodeSaveTimeout);
                   }
-                  this.lintAfterVSCodeSaveTimeout = setTimeout(() => {
+                  this.lintAfterVSCodeSaveTimeout = global.setTimeout(() => {
                      if (this.config.markdownlintFixAllOnSave) { // Changed from autoLint to markdownlintFixAllOnSave
                         Logger.log('[AutoSaveManager] Linting after VS Code auto-save delay.');
                         this.applyMarkdownlintFixAllIfEnabled();
@@ -192,7 +192,7 @@ export class AutoSaveManager {
          clearTimeout(this.saveTimeout);
       }
       Logger.log(`[AutoSaveManager] triggerAutoSave called for ${document.uri.fsPath}`);
-      this.saveTimeout = setTimeout(async () => {
+      this.saveTimeout = global.setTimeout(async () => {
          this._isExtensionSaving = true;
          Logger.log(`[AutoSaveManager] triggerAutoSave: Extension is about to save ${document.uri.fsPath}`);
          try {
