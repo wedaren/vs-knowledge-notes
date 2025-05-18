@@ -28,24 +28,40 @@ Commit Message 结构应如下：
 - 例如: 简化了前端逻辑，使其更专注于 UI 渲染和用户交互。
 - 例如: 提高了代码的可维护性和可扩展性。
 
-请确保 commit message 清晰、简洁且信息完整。
-例如 (这是一个完整的 commit message 示例):
-'''
-feat(chat): 将聊天记录解析逻辑迁移到后端
-
-本次提交将聊天记录的解析和预处理逻辑从前端 (media/chat.js) 迁移到后端 (src/chatViewProvider.ts)。
-
-主要变更包括：
-- 在 `chatViewProvider.ts` 中新增 `parseChatHistory` 方法，负责解析从 .chatlog.md 文件读取的字符串历史记录。
-- 修改 `chatViewProvider.ts` 中的 `updateChatHistory` 方法，使其调用新的解析方法，并通过 `loadParsedHistory` 事件将结构化消息数组发送给 Webview。
-- 修改 `media/chat.js` 以处理新的 `loadParsedHistory` 消息类型，并直接使用后端解析后的消息对象渲染历史记录。
-- 清理了相关文件中的行内注释。
-
-这样做的好处是：
-- 简化了前端逻辑，使其更专注于 UI 渲染和用户交互。
-- 后端集中处理数据获取、解析和格式化，提高了代码的可维护性和可扩展性。
-'''
-
 // 步骤 4: 提供 Commit 命令
-@terminal 执行 `git commit -m "生成的commit message"` 命令
+// 重要提示：当需要执行 git commit 命令时，为了确保 commit message (特别是包含单引号 ' 或其他特殊shell字符时) 能够被 shell 正确解析并传递给 git，请严格遵循以下步骤：
+//
+// 1. 生成原始 Commit Message：
+//    首先，根据代码变更和 Conventional Commits 规范，生成一个标准的 commit message 字符串。
+//    我们称此字符串为 “原始 commit message”。
+//
+// 2. 处理原始 Commit Message 以适应 Shell：
+//    接下来，需要对“原始 commit message”进行转换，以生成一个“处理后的 commit message”，使其能安全地嵌入到单引号包裹的 shell 命令中。
+//    转换规则：将“原始 commit message”中的每一个单引号字符 (') 替换为序列 `'\''` (这四个字符依次是：单引号，反斜杠，单引号，单引号)。
+//
+//    例如：
+//    如果“原始 commit message”是: `feat(user): add 'admin' role`
+//    经过处理后，它将变成: `feat(user): add '\''admin'\'' role`
+//
+//    另一个例子：
+//    如果“原始 commit message”是: `fix: resolve issue with it's parsing`
+//    经过处理后，它将变成: `fix: resolve issue with it'\''s parsing`
+//
+//    再一个例子 (包含反引号)：
+//    如果“原始 commit message”是: `docs: update README with \`important\` notice`
+//    经过处理后，它将变成: `docs: update README with \`important\` notice` (因为反引号在单引号内不需要特殊处理，所以不变)
+//    但如果原始消息是: `feat: it's a new feature with \`code\``
+//    处理后是: `feat: it'\''s a new feature with \`code\``
+//
+// 3. 构建并执行 Commit 命令：
+//    使用“处理后的 commit message”构建最终的 `git commit` 命令。命令的格式应为：
+//    `git commit -m '此处放入处理后的 commit message'`
+//
+//    承接上面的例子，最终生成的命令会是：
+//    对于第一个例子: `git commit -m 'feat(user): add '\''admin'\'' role'`
+//    对于第二个例子: `git commit -m 'fix: resolve issue with it'\''s parsing'`
+//    对于包含反引号的例子: `git commit -m 'feat: it'\''s a new feature with \`code\``
+//
+// 请确保 @terminal 执行的命令严格遵循此格式，将“处理后的 commit message”准确地放在单引号之间。
+@terminal 执行 `git commit -m '此处放入处理后的 commit message'` 命令
 

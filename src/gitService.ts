@@ -59,21 +59,22 @@ export class GitService {
          vscode.window.showErrorMessage('指定的目录不是有效的 Git 仓库');
          return;
       }
+      try {
+         //将请求添加到队列，并返回一个 Promise
+         new Promise<void>((resolve, reject) => {
+            this.commitQueue.push({
+               directoryPath,
+               message,
+               resolve,
+               reject
+            });
 
-      //将请求添加到队列，并返回一个 Promise
-      return new Promise<void>((resolve, reject) => {
-         this.commitQueue.push({
-            directoryPath,
-            message,
-            resolve,
-            reject
+            //如果队列没有在处理中，开始处理队列
+            if (!this.isProcessingQueue) {
+               this.processCommitQueue();
+            }
          });
-
-         //如果队列没有在处理中，开始处理队列
-         if (!this.isProcessingQueue) {
-            this.processCommitQueue();
-         }
-      });
+      } catch { }
    }
 
    /**
@@ -103,9 +104,7 @@ export class GitService {
             title: '正在保存到 Git...',
             cancellable: false
          }, async (progress) => {
-            // Errors thrown in this callback will cause the promise from withProgress to reject.
-
-            // GIT PULL --REBASE
+            // TODO：没有网络时不执行
             try {
                progress.report({ message: '正在拉取最新更改...' });
                await this.executeCommand('git pull --rebase', directoryPath);
