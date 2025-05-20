@@ -144,6 +144,7 @@ export class NoteExplorer {
       const noteFileUri = this.getTodayNoteFileUri(folderUri);
       await this.ensureTodayNoteFileExists(noteFileUri);
       await this.openFile(noteFileUri);
+      await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
    }
 
    public async ensureTodayOrderFolderExists(notesDir: vscode.Uri): Promise<vscode.Uri | undefined> {
