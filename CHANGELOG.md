@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.1.31] - 2025-05-24
+
+- 将 Git 操作迁移到 simple-git 库
+- 打开今日笔记后聚焦编辑器而非侧边栏
+
 ## [1.1.30] - 2025-05-18
 
 - 完善 review.prompt 对 commit message特殊字符处理的指导
