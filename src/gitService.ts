@@ -31,32 +31,12 @@ export class GitService {
    }
 
    /**
-    * 检查指定目录是否是一个 Git 仓库
-    * @param directoryPath 要检查的目录路径
-    */
-   async isGitRepository(directoryPath: string): Promise<boolean> {
-      try {
-         const result = await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: '检查 Git 仓库...',
-            cancellable: false
-         }, async () => {
-            const git: SimpleGit = simpleGit(directoryPath);
-            return await git.checkIsRepo();
-         });
-         return result;
-      } catch (error) {
-         return false;
-      }
-   }
-
-   /**
     * 自动提交并推送更改到远程仓库
     * @param directoryPath Git 仓库路径
     * @param message 提交信息
     */
    async commitAndPush(directoryPath: string, message?: string): Promise<void> {
-      if (!await this.isGitRepository(directoryPath)) {
+      if (!await simpleGit(directoryPath).checkIsRepo()) {
          vscode.window.showErrorMessage('指定的目录不是有效的 Git 仓库');
          return;
       }
@@ -82,8 +62,7 @@ export class GitService {
     * 尝试执行 git pull --rebase 并处理常见的冲突和错误。
     * 如果遇到“未暂存更改”错误，则会抛出该错误，由调用方处理。
     */
-   private async tryPullRebase(directoryPath: string, progress: vscode.Progress<{ message?: string; increment?: number }>): Promise<void> {
-      progress.report({ message: '正在从远程仓库拉取最新更改 (rebase)...' });
+   private async tryPullRebase(directoryPath: string): Promise<void> {
       const git: SimpleGit = simpleGit(directoryPath);
       try {
          const pullResult = await git.pull(['--rebase']);
@@ -98,7 +77,6 @@ export class GitService {
          const errorMessage = pullRebaseError.message || String(pullRebaseError);
 
          Logger.log('[WARN] [GitService] tryPullRebase: git pull --rebase 发生冲突，尝试自动合并...', { error: errorMessage });
-         progress.report({ message: '检测到冲突，尝试自动合并...' });
          try {
             await git.add('.');
             Logger.log('[GitService] tryPullRebase: 自动合并冲突：git add . 成功。');
@@ -109,7 +87,6 @@ export class GitService {
             vscode.window.showInformationMessage('笔记同步完成。检测到并已自动合并文件冲突，请检查包含冲突标记的文件。');
          } catch (continueRebaseError: any) {
             Logger.log('[ERROR] [GitService] tryPullRebase: 自动合并冲突后 git rebase --continue 失败。尝试中止 rebase。', { error: continueRebaseError?.message || String(continueRebaseError) });
-            progress.report({ message: '自动合并失败，正在中止操作...' });
             try {
                await git.rebase(['--abort']);
                Logger.log('[GitService] tryPullRebase: git rebase --abort 执行成功，已回滚变基操作。');
@@ -154,54 +131,27 @@ export class GitService {
             const git: SimpleGit = simpleGit(directoryPath);
 
             try {
-               await this.tryPullRebase(directoryPath, progress);
-            } catch (pullRebaseError: any) {
-               const errorMessage = pullRebaseError.message || String(pullRebaseError);
-               if (errorMessage.includes('You have unstaged changes') || errorMessage.includes('Your index contains uncommitted changes') || errorMessage.includes('cannot rebase: You have unstaged changes')) {
-                  Logger.log('[WARN] [GitService] processCommitQueue: 拉取因本地未提交更改而暂停。自动暂存并提交，然后重试拉取。', { error: errorMessage });
-                  progress.report({ message: '检测到本地未提交更改，自动处理并重试拉取...' });
-                  try {
-                     await git.add('.');
-                     const statusResultBeforeCommit = await git.status();
-                     if (statusResultBeforeCommit.files.length > 0) {
-                        const tempCommitMsg = `自动暂存本地更改: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
-                        await git.commit(tempCommitMsg);
-                        Logger.log('[GitService] processCommitQueue: 自动提交本地未暂存更改成功。');
-                        vscode.window.showInformationMessage('已自动提交本地未暂存的更改。正在重试同步...');
-                     } else {
-                        Logger.log('[GitService] processCommitQueue: 没有需要自动提交的本地更改。');
-                     }
-                     Logger.log('[GitService] processCommitQueue: 重新尝试 git pull --rebase 操作...');
-                     await this.tryPullRebase(directoryPath, progress);
-                  } catch (autoCommitOrRetryPullError: any) {
-                     const errorMsg = autoCommitOrRetryPullError.message || String(autoCommitOrRetryPullError);
-                     Logger.log('[ERROR] [GitService] processCommitQueue: 自动处理本地更改并重试同步时发生错误。', { error: errorMsg, details: autoCommitOrRetryPullError });
-                     if (!(errorMsg.includes('拉取失败') || errorMsg.includes('自动合并冲突失败'))) {
-                        vscode.window.showErrorMessage(`自动处理本地更改并重试同步失败: ${errorMsg}`);
-                     }
-                     throw autoCommitOrRetryPullError;
-                  }
+               await git.add('.');
+               const statusResultBeforeCommit = await git.status();
+               if (statusResultBeforeCommit.files.length > 0) {
+                  const commitMsg = message || `自动保存: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
+                  await git.commit(commitMsg);
+                  Logger.log('[GitService] processCommitQueue: 自动提交本地未暂存更改成功。');
+                  vscode.window.showInformationMessage('已自动提交本地未暂存的更改。正在重试同步...');
                } else {
-                  throw pullRebaseError; // 其他错误由 tryPullRebase 内部处理或直接抛出
+                  Logger.log('[GitService] processCommitQueue: 没有需要自动提交的本地更改。');
                }
+               Logger.log('[GitService] processCommitQueue: 重新尝试 git pull --rebase 操作...');
+               await this.tryPullRebase(directoryPath);
+            } catch (autoCommitOrRetryPullError: any) {
+               const errorMsg = autoCommitOrRetryPullError.message || String(autoCommitOrRetryPullError);
+               Logger.log('[ERROR] [GitService] processCommitQueue: 自动处理本地更改并重试同步时发生错误。', { error: errorMsg, details: autoCommitOrRetryPullError });
+               if (!(errorMsg.includes('拉取失败') || errorMsg.includes('自动合并冲突失败'))) {
+                  vscode.window.showErrorMessage(`自动处理本地更改并重试同步失败: ${errorMsg}`);
+               }
+               throw autoCommitOrRetryPullError;
             }
 
-            const commitMsg = message || `自动保存: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
-
-            progress.report({ message: '正在暂存所有更改...' });
-            await git.add('.');
-            Logger.log('[GitService] processCommitQueue: 添加所有更改成功。');
-
-            const statusResult = await git.status();
-
-            if (statusResult.files.length > 0) {
-               progress.report({ message: '提交更改...' });
-               await git.commit(commitMsg);
-               Logger.log('[GitService] processCommitQueue: 提交更改成功。', { commitMsg });
-            } else {
-               progress.report({ message: '没有需要提交的更改' });
-               Logger.log('[GitService] processCommitQueue: 没有更改需要提交或仓库已是最新。');
-            }
 
             progress.report({ message: '正在推送到远程仓库...' });
             await git.push();
