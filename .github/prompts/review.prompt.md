@@ -5,7 +5,7 @@ mode: 'agent'
 // 目标：审查暂存区的代码变更，提供反馈，并生成符合规范的 commit message。
 
 // 步骤 1: 显示暂存区变更
-@terminal 执行 `git --no-pager diff --staged` 命令并直接使用其输出。
+@terminal 执行 `git --no-pager diff --staged -w` 命令并直接使用其输出。
 
 // 步骤 2: 代码审查与反馈
 请基于以下几点，对暂存区的代码变更进行审查：
