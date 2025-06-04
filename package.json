@@ -218,6 +218,30 @@
             "command": "daily-order.createNoteFromSelection",
             "category": "Daily Order",
             "title": "从选中文本新建笔记"
+         },
+         {
+            "command": "daily-order.outlineExplorer.refresh",
+            "category": "Daily Order",
+            "title": "刷新文档大纲",
+            "icon": "$(refresh)"
+         },
+         {
+            "command": "daily-order.outlineExplorer.collapseAll",
+            "category": "Daily Order",
+            "title": "折叠所有节点",
+            "icon": "$(collapse-all)"
+         },
+         {
+            "command": "daily-order.outlineExplorer.expandAll",
+            "category": "Daily Order",
+            "title": "展开所有节点",
+            "icon": "$(expand-all)"
+         },
+         {
+            "command": "daily-order.outlineExplorer.addHeading",
+            "category": "Daily Order",
+            "title": "添加新标题",
+            "icon": "$(add)"
          }
       ],
       "keybindings": [
@@ -301,6 +325,12 @@
                "contextualTitle": "Tag Explorer"
             },
             {
+               "id": "daily-order.outlineExplorer",
+               "name": "文档大纲",
+               "icon": "$(list-tree)",
+               "contextualTitle": "文档大纲"
+            },
+            {
                "id": "daily-order.searchView",
                "name": "Search Results",
                "icon": "$(search-results)",
@@ -370,6 +400,16 @@
             "view": "daily-order.searchView",
             "contents": "No results found. Try a different search term or adjust search options.",
             "when": "config.daily-order.notesDir && dailyOrderSearch.noResults"
+         },
+         {
+            "view": "daily-order.outlineExplorer",
+            "contents": "请打开一个 Markdown 文件以显示文档大纲。",
+            "when": "!activeEditorIsMarkdown"
+         },
+         {
+            "view": "daily-order.outlineExplorer",
+            "contents": "正在加载文档大纲...",
+            "when": "activeEditorIsMarkdown && !daily-order.outlineLoaded"
          }
       ],
       "menus": {
@@ -412,6 +452,30 @@
                   "light": "$(clear-all)",
                   "dark": "$(clear-all)"
                }
+            },
+            {
+               "command": "daily-order.outlineExplorer.refresh",
+               "when": "view == daily-order.outlineExplorer",
+               "group": "navigation@1",
+               "icon": "$(refresh)"
+            },
+            {
+               "command": "daily-order.outlineExplorer.collapseAll",
+               "when": "view == daily-order.outlineExplorer",
+               "group": "navigation@2",
+               "icon": "$(collapse-all)"
+            },
+            {
+               "command": "daily-order.outlineExplorer.expandAll",
+               "when": "view == daily-order.outlineExplorer",
+               "group": "navigation@3",
+               "icon": "$(expand-all)"
+            },
+            {
+               "command": "daily-order.outlineExplorer.addHeading",
+               "when": "view == daily-order.outlineExplorer",
+               "group": "navigation@4",
+               "icon": "$(add)"
             }
          ],
          "view/item/context": [
@@ -606,6 +670,23 @@
                "type": "number",
                "default": 6666,
                "description": "文本更改后，此扩展的自动保存功能的延迟（毫秒）。如果 'daily-order.markdownlintFixAllOnSave' 为 true，则也用作在 VS Code 内置 'files.autoSave' 事件触发保存后进行 linting 的延迟。（默认值：6666 毫秒）。"
+            },
+            "daily-order.outline.autoExpandAll": {
+               "type": "boolean",
+               "default": false,
+               "description": "打开 Markdown 文件时是否自动展开所有大纲节点。"
+            },
+            "daily-order.outline.showHeadingNumbers": {
+               "type": "boolean",
+               "default": true,
+               "description": "是否在大纲视图中显示标题的序号。"
+            },
+            "daily-order.outline.maxDepth": {
+               "type": "number",
+               "default": 6,
+               "minimum": 1,
+               "maximum": 6,
+               "description": "大纲视图显示的最大标题深度（从 1 到 6）。"
             }
          }
       }

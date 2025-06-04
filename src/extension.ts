@@ -19,6 +19,7 @@ import { SearchInputViewProvider } from './searchInputViewProvider';
 import { AddNoteTool } from './languageModelTools';
 import { thinkerHandler } from './thinkerChatParticipant';
 import { createNoteFromSelection } from './createNoteFromSelection';
+import { registerOutlineExplorer } from './outlineExplorer';
 import { Logger } from './logger'; // 导入 Logger
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -158,6 +159,7 @@ export async function activate(context: vscode.ExtensionContext) {
       showDebugPanelCommand,
       markdownLinkHandler,
       vscode.commands.registerCommand('daily-order.createNoteFromSelection', () => createNoteFromSelection(noteExplorer)),
+      registerOutlineExplorer(context),
       ...registerCommands()
    );
 }
