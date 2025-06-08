@@ -272,6 +272,10 @@ export class ChatApp extends LitElement {
     console.log('History changed to:', this.currentHistoryValue);
   }
 
+  handleOpenPromptFile() {
+    vscode.postMessage({ type: 'openAssociatedPromptFile' }); // 发送消息给扩展
+  }
+
   handleChatInputKeydown(event: KeyboardEvent) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -380,6 +384,12 @@ export class ChatApp extends LitElement {
             @keyup=${this.handleChatInputArrowKey}></textarea>
         </div>
         <div class="model-selector-container">
+          <button 
+            id="open-prompt-button" 
+            @click=${this.handleOpenPromptFile} 
+            title="打开 Prompt 文件"
+            style="border: 1px solid var(--vscode-input-border); background-color: var(--vscode-input-background); color: var(--vscode-input-foreground); cursor: pointer; font-size: var(--vscode-font-size); padding: 4px; border-radius: 4px;"
+          >Prompt</button>
           <model-selector
             .currentModelId=${this.currentChatModelId}
             @model-change=${this.handleModelChange}

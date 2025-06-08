@@ -204,6 +204,34 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
                   this.sendMessageToWebview({ type: 'newMessage', text: errorMessage });
                }
                break;
+            case 'openAssociatedPromptFile':
+               if (this.currentPromptFileUri) {
+                  try {
+                     const document = await vscode.workspace.openTextDocument(this.currentPromptFileUri);
+                     await vscode.window.showTextDocument(document);
+                  } catch (error: any) {
+                     // 检查错误是否因为文件未找到
+                     if (error.code === 'FileNotFound' || (error.message && error.message.includes('cannot open file'))) { // ENOENT or similar
+                        try {
+                           // 尝试创建文件
+                           await vscode.workspace.fs.writeFile(this.currentPromptFileUri, new Uint8Array()); // 创建一个空文件
+                           const document = await vscode.workspace.openTextDocument(this.currentPromptFileUri);
+                           await vscode.window.showTextDocument(document);
+                           vscode.window.showInformationMessage(`Created and opened new prompt file: ${this.currentPromptFileUri.fsPath}`);
+                        } catch (creationError) {
+                           console.error(`Failed to create and open prompt file ${this.currentPromptFileUri.fsPath}:`, creationError);
+                           vscode.window.showErrorMessage(`Could not create or open prompt file: ${this.currentPromptFileUri.fsPath}`);
+                        }
+                     } else {
+                        // 其他类型的错误
+                        console.error(`Failed to open prompt file ${this.currentPromptFileUri.fsPath}:`, error);
+                        vscode.window.showErrorMessage(`Could not open prompt file: ${this.currentPromptFileUri.fsPath}`);
+                     }
+                  }
+               } else {
+                  vscode.window.showInformationMessage('No associated prompt file is currently set.');
+               }
+               break;
          }
       });
    }
