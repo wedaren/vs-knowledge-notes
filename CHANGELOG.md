@@ -1,5 +1,13 @@
 # Change Log
 
+## [1.1.33] - 2025-06-09
+
+- implement today's note outline view with drag and drop support
+- 添加打开关联 Prompt 文件的功能
+- add document outline explorer with refresh, collapse, expand, and add heading functionalities
+- update command to show staged changes with whitespace ignored
+- 增强链接处理能力并更新提示模式
+
 ## [1.1.32] - 2025-05-28
 
 - 简化 Git 操作逻辑并优化自动同步流程
