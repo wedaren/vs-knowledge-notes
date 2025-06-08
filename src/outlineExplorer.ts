@@ -15,7 +15,7 @@ export class OutlineProvider implements vscode.TreeDataProvider<HeadingRange>, v
 
     // 拖放控制器实现
     public readonly dragMimeTypes = ['application/vnd.code.tree.daily-order.outlineExplorer'];
-    public readonly dropMimeTypes = ['application/vnd.code.tree.daily-order.outlineExplorer'];
+    public readonly dropMimeTypes = ['application/vnd.code.tree.daily-order.outlineExplorer', 'text/uri-list'];
 
     private headings: HeadingRange[] = [];
     private editor?: vscode.TextEditor;

@@ -242,6 +242,24 @@
             "category": "Daily Order",
             "title": "添加新标题",
             "icon": "$(add)"
+         },
+         {
+            "command": "daily-order.todayExplorer.refresh",
+            "category": "Daily Order",
+            "title": "刷新今日笔记大纲",
+            "icon": "$(refresh)"
+         },
+         {
+            "command": "daily-order.todayExplorer.collapseAll",
+            "category": "Daily Order",
+            "title": "折叠今日笔记所有节点",
+            "icon": "$(collapse-all)"
+         },
+         {
+            "command": "daily-order.todayExplorer.expandAll",
+            "category": "Daily Order",
+            "title": "展开今日笔记所有节点",
+            "icon": "$(expand-all)"
          }
       ],
       "keybindings": [
@@ -336,6 +354,13 @@
                "icon": "$(search-results)",
                "contextualTitle": "Search Results",
                "when": "config.daily-order.notesDir"
+            },
+            {
+               "id": "daily-order.todayExplorer",
+               "name": "今日笔记大纲",
+               "icon": "$(list-flat)",
+               "contextualTitle": "今日笔记大纲",
+               "when": "config.daily-order.notesDir"
             }
          ],
          "dailyorderpanel": [
@@ -410,6 +435,16 @@
             "view": "daily-order.outlineExplorer",
             "contents": "正在加载文档大纲...",
             "when": "activeEditorIsMarkdown && !daily-order.outlineLoaded"
+         },
+         {
+            "view": "daily-order.todayExplorer",
+            "contents": "正在加载今日笔记大纲...",
+            "when": "config.daily-order.notesDir && !daily-order.todayOutlineLoaded"
+         },
+         {
+            "view": "daily-order.todayExplorer",
+            "contents": "今日笔记大纲为空或无法加载。",
+            "when": "config.daily-order.notesDir && daily-order.todayOutlineLoaded && daily-order.todayOutlineEmpty"
          }
       ],
       "menus": {
@@ -476,6 +511,24 @@
                "when": "view == daily-order.outlineExplorer",
                "group": "navigation@4",
                "icon": "$(add)"
+            },
+            {
+               "command": "daily-order.todayExplorer.refresh",
+               "when": "view == daily-order.todayExplorer",
+               "group": "navigation@1",
+               "icon": "$(refresh)"
+            },
+            {
+               "command": "daily-order.todayExplorer.collapseAll",
+               "when": "view == daily-order.todayExplorer",
+               "group": "navigation@2",
+               "icon": "$(collapse-all)"
+            },
+            {
+               "command": "daily-order.todayExplorer.expandAll",
+               "when": "view == daily-order.todayExplorer",
+               "group": "navigation@3",
+               "icon": "$(expand-all)"
             }
          ],
          "view/item/context": [

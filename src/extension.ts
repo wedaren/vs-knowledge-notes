@@ -20,6 +20,7 @@ import { AddNoteTool } from './languageModelTools';
 import { thinkerHandler } from './thinkerChatParticipant';
 import { createNoteFromSelection } from './createNoteFromSelection';
 import { registerOutlineExplorer } from './outlineExplorer';
+import { TodayOutlineProvider } from './todayExplorer'; // Added import
 import { Logger } from './logger'; // 导入 Logger
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -133,6 +134,9 @@ export async function activate(context: vscode.ExtensionContext) {
    context.subscriptions.push(disposable);
 
    const thinker = vscode.chat.createChatParticipant('daily-order.thinker', thinkerHandler);
+
+   // Create and register TodayOutlineProvider
+   TodayOutlineProvider.register(context, fileSystemProvider); // Use the static register method
 
    context.subscriptions.push(
       vscode.commands.registerCommand('daily-order.toggleAutoSavePause', () => {
