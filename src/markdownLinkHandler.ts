@@ -193,7 +193,8 @@ export class MarkdownLinkHandler {
             linkPath.startsWith('https://') ||
             linkPath.startsWith('mailto:') ||
             linkPath.startsWith('vscode://') ||
-            linkPath.startsWith('#')
+            linkPath.startsWith('#') ||
+            !linkPath.endsWith('md')
          ) { continue; }
 
          const link = new vscode.DocumentLink(
