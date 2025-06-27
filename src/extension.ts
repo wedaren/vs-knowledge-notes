@@ -111,23 +111,23 @@ export async function activate(context: vscode.ExtensionContext) {
       return fileExtension === '.md' || fileExtension === '.markdown';
    }
 
-   async function processNotesEditor(editor: vscode.TextEditor) {
-      if (checkIfSupportedLLMChat(editor.document.uri)) {
-         vscode.commands.executeCommand('setContext', 'supportedLLMChat', true);
-         await chatViewProvider.setReadlyPanel(editor);
-      } else {
-         vscode.commands.executeCommand('setContext', 'supportedLLMChat', false);
-      }
+   // async function processNotesEditor(editor: vscode.TextEditor) {
+   //    if (checkIfSupportedLLMChat(editor.document.uri)) {
+   //       vscode.commands.executeCommand('setContext', 'supportedLLMChat', true);
+   //       await chatViewProvider.setReadlyPanel(editor);
+   //    } else {
+   //       vscode.commands.executeCommand('setContext', 'supportedLLMChat', false);
+   //    }
 
-      checkIfFileInNotesDir(editor.document.uri) && noteExplorer.reveal(editor.document.uri);
-   }
+   //    checkIfFileInNotesDir(editor.document.uri) && noteExplorer.reveal(editor.document.uri);
+   // }
 
-   vscode.window.onDidChangeActiveTextEditor(async editor => {
-      if (!editor) return;
-      processNotesEditor(editor);
-   });
+   // vscode.window.onDidChangeActiveTextEditor(async editor => {
+   //    if (!editor) return;
+   //    processNotesEditor(editor);
+   // });
 
-   if (vscode.window.activeTextEditor) processNotesEditor(vscode.window.activeTextEditor);
+   // if (vscode.window.activeTextEditor) processNotesEditor(vscode.window.activeTextEditor);
 
    const addNoteTool = new AddNoteTool(fileSystemProvider);
    const disposable = vscode.lm.registerTool('daily_order_add_note', addNoteTool);

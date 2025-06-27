@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.34] - 2025-06-27
+
+- 版本更新、性能优化、稳定性提升
+
 ## [1.1.33] - 2025-06-09
 
 - implement today's note outline view with drag and drop support
