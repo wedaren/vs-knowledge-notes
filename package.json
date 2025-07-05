@@ -30,29 +30,6 @@
             "isSticky": true
          }
       ],
-      "languageModelTools": [
-         {
-            "name": "daily_order_add_note",
-            "displayName": "Add to Today's Note",
-            "modelDescription": "每次对话中，总结对话内容添加到今天的笔记中。",
-            "canBeReferencedInPrompt": true,
-            "toolReferenceName": "addNote",
-            "icon": "$(notebook-write)",
-            "userDescription": "Appends text to today's note.",
-            "inputSchema": {
-               "type": "object",
-               "properties": {
-                  "textToAppend": {
-                     "type": "string",
-                     "description": "The text content to append to today's note file."
-                  }
-               },
-               "required": [
-                  "textToAppend"
-               ]
-            }
-         }
-      ],
       "commands": [
          {
             "command": "daily-order.setNotesDir",
