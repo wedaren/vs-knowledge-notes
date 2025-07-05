@@ -16,7 +16,6 @@ import { TimestampAssistant } from './assistants/timestampAssistant';
 import { PromptCompletionProvider } from './promptCompletionProvider';
 import { ChatViewProvider } from './chatViewProvider';
 import { SearchInputViewProvider } from './searchInputViewProvider';
-import { AddNoteTool } from './languageModelTools';
 import { thinkerHandler } from './thinkerChatParticipant';
 import { createNoteFromSelection } from './createNoteFromSelection';
 import { registerOutlineExplorer } from './outlineExplorer';
@@ -128,10 +127,6 @@ export async function activate(context: vscode.ExtensionContext) {
    // });
 
    // if (vscode.window.activeTextEditor) processNotesEditor(vscode.window.activeTextEditor);
-
-   const addNoteTool = new AddNoteTool(fileSystemProvider);
-   const disposable = vscode.lm.registerTool('daily_order_add_note', addNoteTool);
-   context.subscriptions.push(disposable);
 
    const thinker = vscode.chat.createChatParticipant('daily-order.thinker', thinkerHandler);
 
