@@ -745,8 +745,7 @@
       }
    },
    "extensionDependencies": [
-      "yzhang.markdown-all-in-one",
-      "davidanson.vscode-markdownlint"
+      "yzhang.markdown-all-in-one"
    ],
    "scripts": {
       "vscode:prepublish": "npm run package",
